@@ -133,7 +133,7 @@
                     for (var j = 0; j < CurrentOrders.length; j++) {
                         if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
                             NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
-                            NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+							NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
                             NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
                         }
                     }
@@ -143,7 +143,8 @@
                 //Calculate all supports
                 for (var i = 0; i < ParticipantOrders.length; i++) {
                     for (var j = 0; j < ParticipantOrders[i].length; j++) {
-                        if (ParticipantOrders[i][j].isSupport) {
+                        if (ParticipantOrders[i][j].isSupport 
+						&& NextGameStatus[ParticipantOrders[i][j].RecievingUnit].UnitArray.length == 0) {
                             //Look through the destination for the support target
                             for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
                                 if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
@@ -155,6 +156,11 @@
                         }
                     }
                 }
+				//Put all stationary Units in their own UnitArrays
+				for (var i = 0; i < NextGameStatus.length; i++) {
+					NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
+					NextGameStatus[i].Unit = null;
+				}
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
