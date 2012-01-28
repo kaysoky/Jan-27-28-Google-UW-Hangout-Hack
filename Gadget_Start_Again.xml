@@ -84,7 +84,9 @@
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
-                    }
+                    } else {
+						alert(gameMaster + "<br />" + participant);
+					}
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
                         //Display which blocks have units
@@ -324,8 +326,7 @@
                 Background.style.top = "0px";
                 Background.width = PlayingField.offsetWidth;
                 Background.height = PlayingField.offsetHeight;
-                //body.insertBefore(Background, PlayingField);
-                body.appendChild(Background);
+                body.insertBefore(Background, PlayingField);
                 
                 var context = Background.getContext("2d");
                 context.lineStyle = "rgb(0, 0, 0)";
