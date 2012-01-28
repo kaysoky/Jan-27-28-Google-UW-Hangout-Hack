@@ -134,46 +134,48 @@
                     NextGameStatus[i].UnitArray = [];
                 }
                 //Move all units into their new [contested] regions
-                for (var i = 0; i < Participants.length; i++) {
-                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
-                    ParticipantOrders.push(CurrentOrders);
-                    for (var j = 0; j < CurrentOrders.length; j++) {
-                        if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
-                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
-							NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
-                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
-                        }
-                    }
-                    //Clear away the orders as they are no longer needed
-                    gapi.hangout.data.clearValue("Orders_" + Participants[i]);
-                }
+                //for (var i = 0; i < Participants.length; i++) {
+                //    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
+                //    ParticipantOrders.push(CurrentOrders);
+                //    for (var j = 0; j < CurrentOrders.length; j++) {
+                //        if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
+                //            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
+				//			NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+                //            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
+                //        }
+                //    }
+                //    //Clear away the orders as they are no longer needed
+                //    gapi.hangout.data.clearValue("Orders_" + Participants[i]);
+                //}
                 //Calculate all supports
-                for (var i = 0; i < ParticipantOrders.length; i++) {
-                    for (var j = 0; j < ParticipantOrders[i].length; j++) {
-                        if (ParticipantOrders[i][j].isSupport 
-						&& NextGameStatus[ParticipantOrders[i][j].RecievingUnit].UnitArray.length == 0) {
-                            //Look through the destination for the support target
-                            for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
-                                if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
-                                    NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
-                                    //Only one ally unit can be supported per support
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                //for (var i = 0; i < ParticipantOrders.length; i++) {
+                //    for (var j = 0; j < ParticipantOrders[i].length; j++) {
+                //        if (ParticipantOrders[i][j].isSupport 
+				//		&& NextGameStatus[ParticipantOrders[i][j].RecievingUnit].UnitArray.length == 0) {
+                //            //Look through the destination for the support target
+                //            for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
+                //                if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
+                //                    NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
+                //                    //Only one ally unit can be supported per support
+                //                    break;
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
 				alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
 				for (var i = 0; i < NextGameStatus.length; i++) {
-					NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
-					NextGameStatus[i].Unit = null;
+					if (NextGameStatus[i].Unit != null) {
+						NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
+						NextGameStatus[i].Unit = null;
+					}
 				}
 				alert("After stationary");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
 					try {
-                    ProcessMoveConflicts(NextGameStatus, i);
+						ProcessMoveConflicts(NextGameStatus, i);
 					} catch (stupidError) {
 						alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
 					}
