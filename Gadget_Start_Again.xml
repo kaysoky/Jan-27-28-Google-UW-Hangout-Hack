@@ -123,6 +123,11 @@
         var ProcessMoveQueue = function () {
             if (isHangout) {
 				alert("start process");
+				for (var i = 0; i < NextGameStatus.length; i++) {
+                    //Reset Unit arrays
+                    NextGameStatus[i].UnitArray = [];
+                }
+				
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -169,7 +174,7 @@
 					try {
                     ProcessMoveConflicts(NextGameStatus, i);
 					} catch (stupidError) {
-						alert(stupidError + " " + NextGameStatus[i].UnitArray);
+						alert(stupidError + " ~ " + NextGameStatus[i].UnitArray);
 					}
                 }
 				alert("Unit commit start");
