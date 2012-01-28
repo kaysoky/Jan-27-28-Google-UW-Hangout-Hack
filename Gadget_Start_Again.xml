@@ -169,6 +169,7 @@
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
+						alert("Unit placed back into thing");
                     }
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
