@@ -122,16 +122,17 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
-				alert("start process");
-				for (var i = 0; i < NextGameStatus.length; i++) {
-                    //Reset Unit arrays
-                    NextGameStatus[i].UnitArray = [];
-                }
-				
+				alert("start process");				
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
                 var NextGameStatus = GetCurrentGameState();
+				
+				//Make sure UnitArrays != null
+				for (var i = 0; i < NextGameStatus.length; i++) {
+                    //Reset Unit arrays
+                    NextGameStatus[i].UnitArray = [];
+                }
                 //Move all units into their new [contested] regions
                 for (var i = 0; i < Participants.length; i++) {
                     var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
