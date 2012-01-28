@@ -168,10 +168,12 @@
                 //}
 				//alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
+				var mustAlert = false;
 				for (var i = 0; i < NextGameStatus.length; i++) {
 					if (NextGameStatus[i].Unit != null) {
 						NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
 						NextGameStatus[i].Unit = null;
+						mustAlert = true;
 					}
 				}
 				//alert("After stationary");
@@ -189,10 +191,10 @@
                     if (NextGameStatus[i].UnitArray.length == 1) {
 						alert("Unit placed back into thing");
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
-                    } else {
-						if (NextGameStatus[i].UnitArray.length > 1) {
-							alert("Too long" + NextGameStatus[i].UnitArray.length);
-						}
+                    } else if (NextGameStatus[i].UnitArray.length > 1) {
+						alert("Too long" + NextGameStatus[i].UnitArray.length);
+					} else if (mustAlert) {
+						alert("Unreachable code");
 					}
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
