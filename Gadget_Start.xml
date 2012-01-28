@@ -13,6 +13,14 @@
       <script type="text/javascript">
       
       <!-- Start application code here -->      
+      var isHangout;
+        try {
+            if (gapi != null) {
+                isHangout = true;
+            }
+        } catch (notGoogle) {
+            isHangout = false;
+        }
       var CurrentGameTurn = 0;
         
         if (isHangout) {
