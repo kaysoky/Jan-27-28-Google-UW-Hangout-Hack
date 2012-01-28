@@ -8,18 +8,21 @@
     <![CDATA[
       <script type="text/javascript" src="//www.google.com/jsapi"></script>
       <script type="text/javascript">google.load("jquery", "1.3.2");</script>
-
       <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
-      <!-- Your application code -->
+      
       <script type="text/javascript">
+      
+      <!-- Start application code here -->
       gapi.hangout.onApiReady.add(
           function(eventObj) {
               if (eventObj.isApiReady) {
                   var body = window.document.getElementsByTagName("BODY")[0];
-                  body.style.backgroundColor = "rgb(0, 255, 0)";
+                  body.style.background = "url(http://www.variantbank.org/results/rules/1/1900.gif)";
               }
           }
       );
+      <!-- End application code here -->
+      
       </script>
     ]]>
   </Content>
