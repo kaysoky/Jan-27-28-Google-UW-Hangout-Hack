@@ -12,15 +12,92 @@
       
       <script type="text/javascript">
       
-      <!-- Start application code here -->
+      <!-- Start application code here -->      
       gapi.hangout.onApiReady.add(
           function(eventObj) {
               if (eventObj.isApiReady) {
-                  var body = window.document.getElementsByTagName("BODY")[0];
-                  body.style.background = "url(http://www.variantbank.org/results/rules/1/1900.gif)";
+                  //var body = window.document.getElementsByTagName("BODY")[0];
+                  CreatePlayingField(PlayingFieldData);
               }
           }
       );
+      var CreatePlayingField = function(Array_LandData) {
+          var body = window.document.getElementsByTagName("BODY")[0];
+          var PlayingField = window.document.createElement("div");
+          PlayingField.id = "PlayingField";
+          PlayingField.style.position = "absolute";
+          PlayingField.style.left = "0px";
+          PlayingField.style.top = "0px";
+          PlayingField.style.width = "100%";
+          PlayingField.style.height = "100%";
+          body.appendChild(PlayingField);
+          for (var i = 0; i < Array_LandData.length; i++) {
+              var block = window.document.createElement("div");
+              block.id = "Block" + i;
+              block.style.position = "absolute";
+              block.style.left = Array_LandData[i].X + "%";
+              block.style.top = Array_LandData[i].Y + "%";
+              block.style.width = Array_LandData[i].Width + "%";
+              block.style.height = Array_LandData[i].Height + "%";
+              block.style.backgroundColor = "rgb(" + i + ", 0, 0)";
+              PlayingField.appendChild(block);
+          }
+      };
+
+      //Look at PlayingFieldData.xcls for the construction of this data
+      var PlayingFieldData =
+          [
+              { X: 0, Y: 0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 10], CostalRestrictions: [[]] }
+              , { X: 0.1, Y: 0, Width: 0.05, Height: 0.1, Label: 1, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [0, 2, 11], CostalRestrictions: [[]] }
+              , { X: 0.2, Y: 0, Width: 0.05, Height: 0.1, Label: 2, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 3, 12], CostalRestrictions: [[]] }
+              , { X: 0.3, Y: 0, Width: 0.05, Height: 0.1, Label: 3, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [2, 4, 13], CostalRestrictions: [[]] }
+              , { X: 0.4, Y: 0, Width: 0.05, Height: 0.1, Label: 4, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [3, 5, 14], CostalRestrictions: [[]] }
+              , { X: 0.5, Y: 0, Width: 0.05, Height: 0.1, Label: 5, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [4, 6, 15], CostalRestrictions: [[]] }
+              , { X: 0.6, Y: 0, Width: 0.05, Height: 0.1, Label: 6, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [5, 7, 16], CostalRestrictions: [[]] }
+              , { X: 0.7, Y: 0, Width: 0.05, Height: 0.1, Label: 7, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [6, 8, 17], CostalRestrictions: [[]] }
+              , { X: 0.8, Y: 0, Width: 0.05, Height: 0.1, Label: 8, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [7, 9, 18], CostalRestrictions: [[]] }
+              , { X: 0.9, Y: 0, Width: 0.05, Height: 0.1, Label: 9, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [8, 19], CostalRestrictions: [[]] }
+              , { X: 0, Y: 0.2, Width: 0.05, Height: 0.1, Label: 10, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [11, 20, 0], CostalRestrictions: [[]] }
+              , { X: 0.1, Y: 0.2, Width: 0.05, Height: 0.1, Label: 11, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [10, 12, 21, 1], CostalRestrictions: [[]] }
+              , { X: 0.2, Y: 0.2, Width: 0.05, Height: 0.1, Label: 12, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [11, 13, 22, 2], CostalRestrictions: [[]] }
+              , { X: 0.3, Y: 0.2, Width: 0.05, Height: 0.1, Label: 13, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [12, 14, 23, 3], CostalRestrictions: [[]] }
+              , { X: 0.4, Y: 0.2, Width: 0.05, Height: 0.1, Label: 14, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [13, 15, 24, 4], CostalRestrictions: [[]] }
+              , { X: 0.5, Y: 0.2, Width: 0.05, Height: 0.1, Label: 15, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [14, 16, 25, 5], CostalRestrictions: [[]] }
+              , { X: 0.6, Y: 0.2, Width: 0.05, Height: 0.1, Label: 16, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [15, 17, 26, 6], CostalRestrictions: [[]] }
+              , { X: 0.7, Y: 0.2, Width: 0.05, Height: 0.1, Label: 17, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [16, 18, 27, 7], CostalRestrictions: [[]] }
+              , { X: 0.8, Y: 0.2, Width: 0.05, Height: 0.1, Label: 18, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [17, 19, 28, 8], CostalRestrictions: [[]] }
+              , { X: 0.9, Y: 0.2, Width: 0.05, Height: 0.1, Label: 19, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [18, 29, 9], CostalRestrictions: [[]] }
+              , { X: 0, Y: 0.4, Width: 0.05, Height: 0.1, Label: 20, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [21, 30, 10], CostalRestrictions: [[]] }
+              , { X: 0.1, Y: 0.4, Width: 0.05, Height: 0.1, Label: 21, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [20, 22, 31, 11], CostalRestrictions: [[]] }
+              , { X: 0.2, Y: 0.4, Width: 0.05, Height: 0.1, Label: 22, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [21, 23, 32, 12], CostalRestrictions: [[]] }
+              , { X: 0.3, Y: 0.4, Width: 0.05, Height: 0.1, Label: 23, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [22, 24, 33, 13], CostalRestrictions: [[]] }
+              , { X: 0.4, Y: 0.4, Width: 0.05, Height: 0.1, Label: 24, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [23, 25, 34, 14], CostalRestrictions: [[]] }
+              , { X: 0.5, Y: 0.4, Width: 0.05, Height: 0.1, Label: 25, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [24, 26, 35, 15], CostalRestrictions: [[]] }
+              , { X: 0.6, Y: 0.4, Width: 0.05, Height: 0.1, Label: 26, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [25, 27, 36, 16], CostalRestrictions: [[]] }
+              , { X: 0.7, Y: 0.4, Width: 0.05, Height: 0.1, Label: 27, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [26, 28, 37, 17], CostalRestrictions: [[]] }
+              , { X: 0.8, Y: 0.4, Width: 0.05, Height: 0.1, Label: 28, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [27, 29, 38, 18], CostalRestrictions: [[]] }
+              , { X: 0.9, Y: 0.4, Width: 0.05, Height: 0.1, Label: 29, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [28, 39, 19], CostalRestrictions: [[]] }
+              , { X: 0, Y: 0.6, Width: 0.05, Height: 0.1, Label: 30, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [31, 40, 20], CostalRestrictions: [[]] }
+              , { X: 0.1, Y: 0.6, Width: 0.05, Height: 0.1, Label: 31, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [30, 32, 41, 21], CostalRestrictions: [[]] }
+              , { X: 0.2, Y: 0.6, Width: 0.05, Height: 0.1, Label: 32, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [31, 33, 42, 22], CostalRestrictions: [[]] }
+              , { X: 0.3, Y: 0.6, Width: 0.05, Height: 0.1, Label: 33, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [32, 34, 43, 23], CostalRestrictions: [[]] }
+              , { X: 0.4, Y: 0.6, Width: 0.05, Height: 0.1, Label: 34, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [33, 35, 44, 24], CostalRestrictions: [[]] }
+              , { X: 0.5, Y: 0.6, Width: 0.05, Height: 0.1, Label: 35, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [34, 36, 45, 25], CostalRestrictions: [[]] }
+              , { X: 0.6, Y: 0.6, Width: 0.05, Height: 0.1, Label: 36, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [35, 37, 46, 26], CostalRestrictions: [[]] }
+              , { X: 0.7, Y: 0.6, Width: 0.05, Height: 0.1, Label: 37, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [36, 38, 47, 27], CostalRestrictions: [[]] }
+              , { X: 0.8, Y: 0.6, Width: 0.05, Height: 0.1, Label: 38, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [37, 39, 48, 28], CostalRestrictions: [[]] }
+              , { X: 0.9, Y: 0.6, Width: 0.05, Height: 0.1, Label: 39, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [38, 49, 29], CostalRestrictions: [[]] }
+              , { X: 0, Y: 0.8, Width: 0.05, Height: 0.1, Label: 40, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [41, 30], CostalRestrictions: [[]] }
+              , { X: 0.1, Y: 0.8, Width: 0.05, Height: 0.1, Label: 41, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [40, 42, 31], CostalRestrictions: [[]] }
+              , { X: 0.2, Y: 0.8, Width: 0.05, Height: 0.1, Label: 42, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [41, 43, 32], CostalRestrictions: [[]] }
+              , { X: 0.3, Y: 0.8, Width: 0.05, Height: 0.1, Label: 43, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [42, 44, 33], CostalRestrictions: [[]] }
+              , { X: 0.4, Y: 0.8, Width: 0.05, Height: 0.1, Label: 44, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [43, 45, 34], CostalRestrictions: [[]] }
+              , { X: 0.5, Y: 0.8, Width: 0.05, Height: 0.1, Label: 45, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [44, 46, 35], CostalRestrictions: [[]] }
+              , { X: 0.6, Y: 0.8, Width: 0.05, Height: 0.1, Label: 46, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [45, 47, 36], CostalRestrictions: [[]] }
+              , { X: 0.7, Y: 0.8, Width: 0.05, Height: 0.1, Label: 47, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [46, 48, 37], CostalRestrictions: [[]] }
+              , { X: 0.8, Y: 0.8, Width: 0.05, Height: 0.1, Label: 48, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [47, 49, 38], CostalRestrictions: [[]] }
+              , { X: 0.9, Y: 0.8, Width: 0.05, Height: 0.1, Label: 49, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [48, 39], CostalRestrictions: [[]] }
+          ];
       <!-- End application code here -->
       
       </script>
