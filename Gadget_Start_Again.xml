@@ -403,9 +403,9 @@
         };
 		
 		var RandomizeColor = function () {
-			var color = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
+			var something = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
 			for (var i = 0; i < PlayingFieldData.length; i++) {
-				$("#Block" + i).animate( { background-color: color }, 500 * Math.random() );
+				$("#Block" + i).animate( { backgroundColor: something }, 500 * Math.random() );
 			}
 			setTimeout(RandomizeColor, 500);
 		}
