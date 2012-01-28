@@ -28,9 +28,12 @@
                 function(eventObj) {
                     if (eventObj.isApiReady) {
                         Initialize();
+                        alert("drawn");
                         //Decide whom calculates the data of the game
                         gapi.hangout.data.submitDelta( { "GameMaster": gapi.hangout.getParticipantId() } );
+                        alert("submit 1");
                         gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
+                        alert("submit 2");
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
                         alert("Totally initialized");
                     }
