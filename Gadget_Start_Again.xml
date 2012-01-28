@@ -108,14 +108,12 @@
                         var gameState = GetCurrentGameState();
                         for (var i = 0; i < gameState.length; i++) {
                             if (gameState[i].Unit != null) {
-								alert("display should change");
                                 window.document.getElementById("Block" + i).innerHTML = "Unit";
                             } else {
                                 window.document.getElementById("Block" + i).innerHTML = "";
                             }
                         }
                     }
-					alert("End next turn");
                 }
             );
         } else {
@@ -125,8 +123,7 @@
         }
         
         var ProcessMoveQueue = function () {
-            if (isHangout) {
-				alert("start process");				
+            if (isHangout) {			
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -167,7 +164,6 @@
                         }
                     }
                 }
-				alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
 				for (var i = 0; i < NextGameStatus.length; i++) {
 					if (NextGameStatus[i].Unit != null) {
@@ -175,24 +171,15 @@
 						NextGameStatus[i].Unit = null;
 					}
 				}
-				alert("After stationary");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
-					try {
                     ProcessMoveConflicts(NextGameStatus, i);
-					} catch (stupidError) {
-						alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
-					}
                 }
-				alert("Unit commit start");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
-						alert("Unit placed back into thing");
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
-                    } else if (NextGameStatus[i].UnitArray.length > 1) {
-						alert("Too long" + NextGameStatus[i].UnitArray.length);
-					}
+                    }
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
                     //Reset the support to zero
@@ -200,7 +187,6 @@
 						NextGameStatus[i].Unit.SupportStrength = 0;
 					}
                 }
-				alert("Unit commit end");
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
@@ -291,7 +277,6 @@
                                 NextGameStatus[Location].UnitArray.remove(i--);
                             } else {
                                 //Doom, Death, No Retreat
-								alert("Unit Removed");
                                 NextGameStatus[Location].UnitArray.remove(i--);
                             }
                         } else {
