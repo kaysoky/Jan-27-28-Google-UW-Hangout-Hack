@@ -169,7 +169,7 @@
 					try {
                     ProcessMoveConflicts(NextGameStatus, i);
 					} catch (stupidError) {
-						alert(stupidError);
+						alert(stupidError + " " + NextGameStatus[i].UnitArray);
 					}
                 }
 				alert("Unit commit start");
