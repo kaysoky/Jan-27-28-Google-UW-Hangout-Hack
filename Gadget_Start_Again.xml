@@ -166,7 +166,11 @@
 				alert("After stationary");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
+					try {
                     ProcessMoveConflicts(NextGameStatus, i);
+					} catch (stupidError) {
+						alert(stupidError);
+					}
                 }
 				alert("Unit commit start");
                 for (var i = 0; i < NextGameStatus.length; i++) {
