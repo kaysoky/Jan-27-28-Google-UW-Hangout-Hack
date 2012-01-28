@@ -6,9 +6,23 @@
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
+      <script type="text/javascript" src="//www.google.com/jsapi"></script>
+      <script type="text/javascript">google.load("jquery", "1.3.2");</script>
+
       <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
       <!-- Your application code -->
-      
+      <script type="text/javascript">
+      gapi.hangout.onApiReady.add(
+          function(eventObj) {
+              if (eventObj.isApiReady) {
+                  var screen = window.document.getElementsByTagName("HTML")[0];
+                  var body = window.document.createElement("body");
+                  body.appendChild(window.document.createTextNode("This had better show up"));
+                  screen.appendchild(body);
+              }
+          }
+      );
+      </script>
     ]]>
   </Content>
 </Module>
