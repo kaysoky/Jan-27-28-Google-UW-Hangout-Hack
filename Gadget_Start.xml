@@ -6,6 +6,7 @@
   </ModulePrefs>
   <Content type="html">
     <![CDATA[
+<<<<<<< HEAD
       <script type="text/javascript" src="//www.google.com/jsapi"></script>
       <script type="text/javascript">google.load("jquery", "1.3.2");</script>
       <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
@@ -367,82 +368,437 @@
                 PlayingField.appendChild(block);
             }
         };
+=======
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript">google.load("jquery", "1.3.2");</script>
+<script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
+<!-- Start application code here -->
+<script type="text/javascript">
+//Gets rid of periods in the participant IDs
+var DePeriodExpression = new RegExp("(\\W+)", "g");
+var GetParticipantID = function () {
+return gapi.hangout.getParticipantId().replace(DePeriodExpression, "");
+};
+var GetParticipantIDs = function () {
+var parties = gapi.hangout.getParticipants();
+var IDs = [];
+for (var i = 0; i < parties.length; i++) {
+IDs.push(parties[i].id.replace(DePeriodExpression, ""));
+}
+return IDs;
+};
+//Breaks up the GameState into many, many objects so that no string limits are reached
+var GetCurrentGameState = function () {
+var length = parseInt(gapi.hangout.data.getValue("GameStateLength"));
+var gameState = [];
+for (var i = 0; i < length; i++) {
+gameState.push(JSON.parse(gapi.hangout.data.getValue("CurrentGameState" + i)));
+}
+return gameState;
+};
+var SetCurrentGameState = function (gameState) {
+gapi.hangout.data.submitDelta( { "GameStateLength": "" + gameState.length } );
+for (var i = 0; i < gameState.length; i++) {
+eval("gapi.hangout.data.submitDelta( { CurrentGameState" + i + ": JSON.stringify(gameState[i]) } );");
+}
+};
+var isHangout;
+try {
+if (gapi != null) {
+isHangout = true;
+}
+} catch (notGoogle) {
+isHangout = false;
+}
+var CurrentGameTurn = 0;
+if (isHangout) {
+gapi.hangout.onApiReady.add(
+function(eventObj) {
+if (eventObj.isApiReady) {
+Initialize();
+//Decide whom calculates the data of the game
+gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
+SetCurrentGameState(PlayingFieldData);
+gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
+}
+}
+);
+gapi.hangout.data.onStateChanged.add(
+function(eventObj) {
+//Only one client does the calculations
+alert("is game master = " + (gapi.hangout.data.getValue("GameMaster") + " " + GetParticipantID()));
+if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
+var Participants = GetParticipantIDs();
+var AllMovesSubmitted = true;
+for (var i = 0; i < Participants.length; i++) {
+try {
+if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
+AllMovesSubmitted = false;
+}
+} catch (notThere) {
+AllMovesSubmitted = false;
+}
+}
+if (AllMovesSubmitted) {
+//This will clear the "Orders_" values in the State
+ProcessMoveQueue();
+}
+}
+if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
+CurrentGameTurn++;
+//Display which blocks have units
+var gameState = GetCurrentGameState();
+for (var i = 0; i < gameState.length; i++) {
+if (gameState[i].Unit != null) {
+window.document.getElementById("Block" + i).innerHTML = "Unit";
+} else {
+window.document.getElementById("Block" + i).innerHTML = "";
+}
+}
+}
+alert("event ended");
+}
+);
+} else {
+window.onload = function () {
+Initialize();
+};
+}
+var ProcessMoveQueue = function () {
+if (isHangout) {
+alert("start move process");
+var Participants = GetParticipantIDs();
+var ParticipantOrders = [];
+var AllMovesSubmitted = true;
+var NextGameStatus = GetCurrentGameState();
+//Move all units into their new [contested] regions
+for (var i = 0; i < Participants.length; i++) {
+var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
+ParticipantOrders.push(CurrentOrders);
+for (var j = 0; j < CurrentOrders.length; j++) {
+if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
+NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
+NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
+}
+}
+//Clear away the orders as they are no longer needed
+gapi.hangout.data.clearValue("Orders_" + Participants[i]);
+}
+alert("processes prelim moves");
+//Calculate all supports
+for (var i = 0; i < ParticipantOrders.length; i++) {
+for (var j = 0; j < ParticipantOrders[i].length; j++) {
+if (ParticipantOrders[i][j].isSupport) {
+//Look through the destination for the support target
+for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
+if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
+NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
+//Only one ally unit can be supported per support
+break;
+}
+}
+}
+}
+}
+alert("end calc support");
+//Resolve all conflicts
+for (var i = 0; i < NextGameStatus.length; i++) {
+ProcessMoveConflicts(NextGameStatus, i);
+}
+for (var i = 0; i < NextGameStatus.length; i++) {
+//Commit the Unit moves
+if (NextGameStatus[i].UnitArray.length == 1) {
+NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
+}
+//Reset Unit arrays
+NextGameStatus[i].UnitArray = [];
+//Reset the support to zero
+NextGameStatus[i].Unit.SupportStrength = 0;
+}
+alert("end commit moves");
+//Start the next turn
+BeginTurn(NextGameStatus);
+//Finally, submit the changed state
+SetCurrentGameState(NextGameStatus);
+gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
+} else {
+for (var i = 0; i < PlayerOrders.length; i++) {
+}
+}
+};
+var BeginTurn = function (NextGameStatus) {
+for (var i = 0; i < NextGameStatus.length; i++) {
+//Increment the Player's control over the regions
+if (NextGameStatus[i].Unit != null) {
+//Convert enemy regions into Player regions
+if (NextGameStatus[i].OwnerID != NextGameStatus[i].Unit.OwnerID) {
+NextGameStatus[i].OwnerInfluence--;
+if (NextGameStatus[i].OwnerInfluence < 0) {
+NextGameStatus[i].OwnerID = NextGameStatus[i].Unit.OwnerID;
+NextGameStatus[i].OwnerInfluence *= -1;
+}
+} else {
+//Over time, influence converges to 3.0
+NextGameStatus[i].OwnerInfluence = 0.15 + 0.95 * NextGameStatus[i].OwnerInfluence;
+}
+} else if (NextGameStatus[i].isSupplyCenter
+&& NextGameStatus[i].OwnerInfluence > 1.5
+&& NextGameStatus[i].OwnerID != null) {
+//This is the only place where units are created
+NextGameStatus[i].Unit =
+{
+OwnerID: NextGameStatus[i].OwnerID
+, SupportStrength: 0
+, isArmy: true
+};
+alert("unit created");
+}
+}
+alert("begin turn done");
+};
+var ProcessMoveConflicts = function (NextGameStatus, Location) {
+if (NextGameStatus[Location].UnitArray.length >= 1 ) {
+var winner;
+var winnerStrength = 0;
+//Find the winner
+for (var i = 0; i < NextGameStatus[Location].UnitArray.length; i++) {
+if (1 + NextGameStatus[Location].UnitArray[i].SupportStrength > winnerStrength) {
+winner = NextGameStatus[Location].UnitArray[i];
+winnerStrength = 1 + NextGameStatus[Location].UnitArray[i].SupportStrength;
+} else if (1 + NextGameStatus[Location].UnitArray[i].SupportStrength == winnerStrength) {
+winner = null;
+}
+}
+//Make all losers retreat
+for (var i = 0; i < NextGameStatus[Location].UnitArray.length; i++) {
+if (NextGameStatus[Location].UnitArray[i] != winner) {
+//Bounce back losers
+//If losers bounce back to same area
+if (NextGameStatus[Location].UnitArray[i].OriginalLocation == Location) {
+//Bounce away allies and weaker enemies
+for (var j = 0; j < NextGameStatus[Location].UnitArray.length; j++) {
+if (i != j
+&& (NextGameStatus[Location].UnitArray[j].OwnerID == NextGameStatus[Location].UnitArray[i].OwnerID
+|| NextGameStatus[Location].UnitArray[j].SupportStrength == 0)) {
+//Push the Unit back to its original location
+NextGameStatus[NextGameStatus[Location].UnitArray[j].OriginalLocation].UnitArray.push(NextGameStatus[Location].UnitArray[j]);
+//Process the location the Unit was pushed back to
+ProcessMoveConflicts(NextGameStatus, NextGameStatus[Location].UnitArray[j].OriginalLocation);
+//Remove the Unit from this location
+NextGameStatus[Location].UnitArray.splice(j, 1);
+//Maintain the "i" value so that it points to the same Unit
+if (j < i) {
+i--;
+}
+}
+}
+//If a stronger force still exists, retreat
+var emptyAdjacents = [];
+for (var j = 0; j < NextGameStatus[Location].Connections.length; j++) {
+if (NextGameStatus[NextGameStatus[Location].Connections[j]].UnitArray.length == 0) {
+emptyAdjacents.push(NextGameStatus[NextGameStatus[Location].Connections[j]]);
+}
+}
+//Choose retreat location randomly
+if (emptyAdjacents.length > 0) {
+var retreatIndex = Math.floor(Math.random() * emptyAdjacents.length);
+emptyAdjacents[retreatIndex].UnitArray.push(NextGameStatus[Location].UnitArray[i])
+NextGameStatus[Location].UnitArray.splice(i, 1);
+i--;
+} else {
+//Doom, Death, No Retreat
+NextGameStatus[Location].UnitArray.splice(i, 1);
+i--;
+}
+} else {
+//Push the Unit back to its original location
+NextGameStatus[NextGameStatus[Location].UnitArray[i].OriginalLocation].UnitArray.push(NextGameStatus[Location].UnitArray[i]);
+//Process the location the Unit was pushed back to
+ProcessMoveConflicts(NextGameStatus, NextGameStatus[Location].UnitArray[i].OriginalLocation);
+//Remove the Unit from this location
+NextGameStatus[Location].UnitArray.splice(i, 1);
+i--;
+}
+}
+}
+}
+};
+/*
+Array
+Order
+Destination
+RecievingUnit
+isSupport
+SupportForID
+*/
+var PlayerOrders = [];
+var SentMovesToState = function() {
+if (isHangout) {
+eval("gapi.hangout.data.submitDelta( { Orders_" + GetParticipantID() + ": JSON.stringify(PlayerOrders) } );");
+} else {
+ProcessMoveQueue();
+}
+};
+var Initialize = function() {
+CreatePlayingField(PlayingFieldData);
+var body = window.document.getElementsByTagName("BODY")[0];
+var PlayingField = window.document.getElementById("PlayingField");
+//Create the end turn button
+var EndTurn = window.document.createElement("div");
+EndTurn.style.position = "absolute";
+EndTurn.style.left = PlayingField.offsetWidth + "px";
+EndTurn.style.top = "0px";
+EndTurn.style.width = (body.offsetWidth - PlayingField.offsetWidth) + "px";
+EndTurn.style.height = PlayingField.offsetHeight + "px";
+EndTurn.style.textAlign = "center";
+EndTurn.style.backgroundColor = "rgb(0, 0, 200)";
+body.appendChild(EndTurn);
+EndTurn.appendChild(window.document.createTextNode("End Turn"));
+EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
+EndTurn.addEventListener("mousedown"
+, function (evt) {
+SentMovesToState();
+}
+);
+};
+var CreatePlayingField = function(Array_LandData) {
+var body = window.document.getElementsByTagName("BODY")[0];
+var PlayingField = window.document.createElement("div");
+PlayingField.id = "PlayingField";
+PlayingField.style.position = "absolute";
+PlayingField.style.left = "0px";
+PlayingField.style.top = "0px";
+PlayingField.style.width = "90%";
+PlayingField.style.height = "100%";
+body.appendChild(PlayingField);
+//Create the background with the Node connectors
+(function () {
+var Background = window.document.createElement("canvas");
+Background.style.position = "absolute"
+Background.style.left = "0px";
+Background.style.top = "0px";
+Background.width = PlayingField.offsetWidth;
+Background.height = PlayingField.offsetHeight;
+//body.insertBefore(Background, PlayingField);
+body.appendChild(Background);
+var context = Background.getContext("2d");
+context.lineStyle = "rgb(0, 0, 0)";
+context.lineWidth = 5;
+//Calculate the centers of all the nodes
+var StartX = [];
+var StartY = [];
+for (var i = 0; i < Array_LandData.length; i++) {
+StartX.push(Background.width * (Array_LandData[i].X + Array_LandData[i].Width / 2));
+StartY.push(Background.height * (Array_LandData[i].Y + Array_LandData[i].Height / 2));
+//Also make the calculation structure for unit moving
+Array_LandData[i].UnitArray = [];
+//Also, set the initial Player control over regions
+Array_LandData[i].OwnerID = null;
+Array_LandData[i].OwnerInfluence = 0;
+}
+for (var i = 0; i < Array_LandData.length; i++) {
+for (var j = 0; j < Array_LandData[i].Connections.length; j++) {
+context.beginPath();
+context.moveTo(StartX[i], StartY[i]);
+context.lineTo(StartX[Array_LandData[i].Connections[j]]
+, StartY[Array_LandData[i].Connections[j]]);
+context.stroke();
+}
+}
+}) ();
+for (var i = 0; i < Array_LandData.length; i++) {
+var block = window.document.createElement("div");
+block.id = "Block" + i;
+block.style.position = "absolute";
+block.style.left = 100 * Array_LandData[i].X + "%";
+block.style.top = 100 * Array_LandData[i].Y + "%";
+block.style.width = 100 * Array_LandData[i].Width + "%";
+block.style.height = 100 * Array_LandData[i].Height + "%";
+block.style.borderWidth = "2px";
+block.style.borderStyle = "solid";
+block.style.borderRadius = "50%";
+block.style.borderColor = "rgb(50, 50, 50)";
+block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
+PlayingField.appendChild(block);
+}
+};
+>>>>>>> 943f4a09701d9b261988a5e0a67e8f277a1f9b24
 
-        //Look at PlayingFieldData.xcls for the construction of this data
-        /*
-        Array
-            DataStructure
-                X
-                Y
-                Width
-                Height
-                Label
-                acceptsArmy
-                acceptsFleet
-                isSupplyCenter
-                Connections (Array)
-            Javascript scripts will append the following to the DataStructure
-                Unit
-                UnitArray
-                OwnerID
-                OwnerInfluence
-        */
-        var PlayingFieldData =
-        [
-            { X: 0, Y:0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 10] }
-            , { X: 0.1, Y:0, Width: 0.05, Height: 0.1, Label: 1, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [0, 2, 11] }
-            , { X: 0.2, Y:0, Width: 0.05, Height: 0.1, Label: 2, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [1, 3, 12] }
-            , { X: 0.3, Y:0, Width: 0.05, Height: 0.1, Label: 3, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 4, 13] }
-            , { X: 0.4, Y:0, Width: 0.05, Height: 0.1, Label: 4, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [3, 5, 14] }
-            , { X: 0.5, Y:0, Width: 0.05, Height: 0.1, Label: 5, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [4, 6, 15] }
-            , { X: 0.6, Y:0, Width: 0.05, Height: 0.1, Label: 6, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [5, 7, 16] }
-            , { X: 0.7, Y:0, Width: 0.05, Height: 0.1, Label: 7, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [6, 8, 17] }
-            , { X: 0.8, Y:0, Width: 0.05, Height: 0.1, Label: 8, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 4, 6, 10, 27] }
-            , { X: 0.9, Y:0, Width: 0.05, Height: 0.1, Label: 9, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 4, 5, 3, 13, 12] }
-            , { X: 0, Y:0.2, Width: 0.05, Height: 0.1, Label: 10, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [2, 5, 7, 9, 11, 36, 37, 16, 17, 15, 13] }
-            , { X: 0.1, Y:0.2, Width: 0.05, Height: 0.1, Label: 11, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 2, 5, 6] }
-            , { X: 0.2, Y:0.2, Width: 0.05, Height: 0.1, Label: 12, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [2, 4, 6, 7, 3] }
-            , { X: 0.3, Y:0.2, Width: 0.05, Height: 0.1, Label: 13, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 10, 8, 7, 5, 4] }
-            , { X: 0.4, Y:0.2, Width: 0.05, Height: 0.1, Label: 14, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [5, 6, 8, 9, 3] }
-            , { X: 0.5, Y:0.2, Width: 0.05, Height: 0.1, Label: 15, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [6, 10, 11, 9, 7] }
-            , { X: 0.6, Y:0.2, Width: 0.05, Height: 0.1, Label: 16, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [3, 7, 8, 11] }
-            , { X: 0.7, Y:0.2, Width: 0.05, Height: 0.1, Label: 17, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [1, 6, 8, 11, 27] }
-            , { X: 0.8, Y:0.2, Width: 0.05, Height: 0.1, Label: 18, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [9, 8, 10, 27, 28, 29, 36] }
-            , { X: 0.9, Y:0.2, Width: 0.05, Height: 0.1, Label: 19, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 13, 21] }
-            , { X: 0, Y:0.4, Width: 0.05, Height: 0.1, Label: 20, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [2, 3, 15, 14, 20, 21, 12] }
-            , { X: 0.1, Y:0.4, Width: 0.05, Height: 0.1, Label: 21, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [13, 15, 17, 18, 19, 20] }
-            , { X: 0.2, Y:0.4, Width: 0.05, Height: 0.1, Label: 22, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [13, 3, 17, 14] }
-            , { X: 0.3, Y:0.4, Width: 0.05, Height: 0.1, Label: 23, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [17, 3, 37, 39] }
-            , { X: 0.4, Y:0.4, Width: 0.05, Height: 0.1, Label: 24, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [14, 15, 3, 16, 39, 18] }
-            , { X: 0.5, Y:0.4, Width: 0.05, Height: 0.1, Label: 25, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: true, Connections: [17, 19, 28, 8] }
-            , { X: 0.6, Y:0.4, Width: 0.05, Height: 0.1, Label: 26, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [25, 27, 36, 16] }
-            , { X: 0.7, Y:0.4, Width: 0.05, Height: 0.1, Label: 27, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [26, 28, 37, 17] }
-            , { X: 0.8, Y:0.4, Width: 0.05, Height: 0.1, Label: 28, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [27, 29, 38, 18] }
-            , { X: 0.9, Y:0.4, Width: 0.05, Height: 0.1, Label: 29, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [28,     39, 19] }
-            , { X: 0, Y:0.6, Width: 0.05, Height: 0.1, Label: 30, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [    31, 40, 20] }
-            , { X: 0.1, Y:0.6, Width: 0.05, Height: 0.1, Label: 31, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [30, 32, 41, 21] }
-            , { X: 0.2, Y:0.6, Width: 0.05, Height: 0.1, Label: 32, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [31, 33, 42, 22] }
-            , { X: 0.3, Y:0.6, Width: 0.05, Height: 0.1, Label: 33, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [32, 34, 43, 23] }
-            , { X: 0.4, Y:0.6, Width: 0.05, Height: 0.1, Label: 34, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [33, 35, 44, 24] }
-            , { X: 0.5, Y:0.6, Width: 0.05, Height: 0.1, Label: 35, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [34, 36, 45, 25] }
-            , { X: 0.6, Y:0.6, Width: 0.05, Height: 0.1, Label: 36, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [35, 37, 46, 26] }
-            , { X: 0.7, Y:0.6, Width: 0.05, Height: 0.1, Label: 37, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [36, 38, 47, 27] }
-            , { X: 0.8, Y:0.6, Width: 0.05, Height: 0.1, Label: 38, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [37, 39, 48, 28] }
-            , { X: 0.9, Y:0.6, Width: 0.05, Height: 0.1, Label: 39, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [38,     49, 29] }
-            , { X: 0, Y:0.8, Width: 0.05, Height: 0.1, Label: 40, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [    41, 30] }
-            , { X: 0.1, Y:0.8, Width: 0.05, Height: 0.1, Label: 41, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [40, 42, 31] }
-            , { X: 0.2, Y:0.8, Width: 0.05, Height: 0.1, Label: 42, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [41, 43, 32] }
-            , { X: 0.3, Y:0.8, Width: 0.05, Height: 0.1, Label: 43, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [42, 44, 33] }
-            , { X: 0.4, Y:0.8, Width: 0.05, Height: 0.1, Label: 44, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [43, 45, 34] }
-            , { X: 0.5, Y:0.8, Width: 0.05, Height: 0.1, Label: 45, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [44, 46, 35] }
-            , { X: 0.6, Y:0.8, Width: 0.05, Height: 0.1, Label: 46, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [45, 47, 36] }
-            , { X: 0.7, Y:0.8, Width: 0.05, Height: 0.1, Label: 47, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [46, 48, 37] }
-            , { X: 0.8, Y:0.8, Width: 0.05, Height: 0.1, Label: 48, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [47, 49, 38] }
-            , { X: 0.9, Y:0.8, Width: 0.05, Height: 0.1, Label: 49, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [48,     39] }
-        ];
-      
-      </script>
-      <!-- End application code here -->
-    ]]>
+//Look at PlayingFieldData.xcls for the construction of this data
+/*
+Array
+DataStructure
+X
+Y
+Width
+Height
+Label
+acceptsArmy
+acceptsFleet
+isSupplyCenter
+Connections (Array)
+Javascript scripts will append the following to the DataStructure
+Unit
+UnitArray
+OwnerID
+OwnerInfluence
+*/
+var PlayingFieldData =
+[
+{ X: 0, Y:0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 10] }
+, { X: 0.1, Y:0, Width: 0.05, Height: 0.1, Label: 1, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [0, 2, 11] }
+, { X: 0.2, Y:0, Width: 0.05, Height: 0.1, Label: 2, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [1, 3, 12] }
+, { X: 0.3, Y:0, Width: 0.05, Height: 0.1, Label: 3, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 4, 13] }
+, { X: 0.4, Y:0, Width: 0.05, Height: 0.1, Label: 4, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [3, 5, 14] }
+, { X: 0.5, Y:0, Width: 0.05, Height: 0.1, Label: 5, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [4, 6, 15] }
+, { X: 0.6, Y:0, Width: 0.05, Height: 0.1, Label: 6, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [5, 7, 16] }
+, { X: 0.7, Y:0, Width: 0.05, Height: 0.1, Label: 7, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [6, 8, 17] }
+, { X: 0.8, Y:0, Width: 0.05, Height: 0.1, Label: 8, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 4, 6, 10, 27] }
+, { X: 0.9, Y:0, Width: 0.05, Height: 0.1, Label: 9, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 4, 5, 3, 13, 12] }
+, { X: 0, Y:0.2, Width: 0.05, Height: 0.1, Label: 10, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [2, 5, 7, 9, 11, 36, 37, 16, 17, 15, 13] }
+, { X: 0.1, Y:0.2, Width: 0.05, Height: 0.1, Label: 11, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 2, 5, 6] }
+, { X: 0.2, Y:0.2, Width: 0.05, Height: 0.1, Label: 12, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [2, 4, 6, 7, 3] }
+, { X: 0.3, Y:0.2, Width: 0.05, Height: 0.1, Label: 13, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 10, 8, 7, 5, 4] }
+, { X: 0.4, Y:0.2, Width: 0.05, Height: 0.1, Label: 14, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [5, 6, 8, 9, 3] }
+, { X: 0.5, Y:0.2, Width: 0.05, Height: 0.1, Label: 15, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [6, 10, 11, 9, 7] }
+, { X: 0.6, Y:0.2, Width: 0.05, Height: 0.1, Label: 16, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [3, 7, 8, 11] }
+, { X: 0.7, Y:0.2, Width: 0.05, Height: 0.1, Label: 17, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [1, 6, 8, 11, 27] }
+, { X: 0.8, Y:0.2, Width: 0.05, Height: 0.1, Label: 18, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [9, 8, 10, 27, 28, 29, 36] }
+, { X: 0.9, Y:0.2, Width: 0.05, Height: 0.1, Label: 19, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 13, 21] }
+, { X: 0, Y:0.4, Width: 0.05, Height: 0.1, Label: 20, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [2, 3, 15, 14, 20, 21, 12] }
+, { X: 0.1, Y:0.4, Width: 0.05, Height: 0.1, Label: 21, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [13, 15, 17, 18, 19, 20] }
+, { X: 0.2, Y:0.4, Width: 0.05, Height: 0.1, Label: 22, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [13, 3, 17, 14] }
+, { X: 0.3, Y:0.4, Width: 0.05, Height: 0.1, Label: 23, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [17, 3, 37, 39] }
+, { X: 0.4, Y:0.4, Width: 0.05, Height: 0.1, Label: 24, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [14, 15, 3, 16, 39, 18] }
+, { X: 0.5, Y:0.4, Width: 0.05, Height: 0.1, Label: 25, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: true, Connections: [17, 19, 28, 8] }
+, { X: 0.6, Y:0.4, Width: 0.05, Height: 0.1, Label: 26, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [25, 27, 36, 16] }
+, { X: 0.7, Y:0.4, Width: 0.05, Height: 0.1, Label: 27, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [26, 28, 37, 17] }
+, { X: 0.8, Y:0.4, Width: 0.05, Height: 0.1, Label: 28, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [27, 29, 38, 18] }
+, { X: 0.9, Y:0.4, Width: 0.05, Height: 0.1, Label: 29, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [28, 39, 19] }
+, { X: 0, Y:0.6, Width: 0.05, Height: 0.1, Label: 30, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [ 31, 40, 20] }
+, { X: 0.1, Y:0.6, Width: 0.05, Height: 0.1, Label: 31, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [30, 32, 41, 21] }
+, { X: 0.2, Y:0.6, Width: 0.05, Height: 0.1, Label: 32, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [31, 33, 42, 22] }
+, { X: 0.3, Y:0.6, Width: 0.05, Height: 0.1, Label: 33, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [32, 34, 43, 23] }
+, { X: 0.4, Y:0.6, Width: 0.05, Height: 0.1, Label: 34, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [33, 35, 44, 24] }
+, { X: 0.5, Y:0.6, Width: 0.05, Height: 0.1, Label: 35, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [34, 36, 45, 25] }
+, { X: 0.6, Y:0.6, Width: 0.05, Height: 0.1, Label: 36, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [35, 37, 46, 26] }
+, { X: 0.7, Y:0.6, Width: 0.05, Height: 0.1, Label: 37, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [36, 38, 47, 27] }
+, { X: 0.8, Y:0.6, Width: 0.05, Height: 0.1, Label: 38, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [37, 39, 48, 28] }
+, { X: 0.9, Y:0.6, Width: 0.05, Height: 0.1, Label: 39, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [38, 49, 29] }
+, { X: 0, Y:0.8, Width: 0.05, Height: 0.1, Label: 40, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [ 41, 30] }
+, { X: 0.1, Y:0.8, Width: 0.05, Height: 0.1, Label: 41, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [40, 42, 31] }
+, { X: 0.2, Y:0.8, Width: 0.05, Height: 0.1, Label: 42, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [41, 43, 32] }
+, { X: 0.3, Y:0.8, Width: 0.05, Height: 0.1, Label: 43, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [42, 44, 33] }
+, { X: 0.4, Y:0.8, Width: 0.05, Height: 0.1, Label: 44, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [43, 45, 34] }
+, { X: 0.5, Y:0.8, Width: 0.05, Height: 0.1, Label: 45, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [44, 46, 35] }
+, { X: 0.6, Y:0.8, Width: 0.05, Height: 0.1, Label: 46, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [45, 47, 36] }
+, { X: 0.7, Y:0.8, Width: 0.05, Height: 0.1, Label: 47, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [46, 48, 37] }
+, { X: 0.8, Y:0.8, Width: 0.05, Height: 0.1, Label: 48, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [47, 49, 38] }
+, { X: 0.9, Y:0.8, Width: 0.05, Height: 0.1, Label: 49, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [48, 39] }
+];
+</script>
+<!-- End application code here -->
+]]>
   </Content>
 </Module>
