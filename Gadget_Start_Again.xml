@@ -73,6 +73,7 @@
 								};
 							}
 						}
+                        SetCurrentGameState(gameState);
                     }
                 }
             );
@@ -137,55 +138,52 @@
                     NextGameStatus[i].UnitArray = [];
                 }
                 //Move all units into their new [contested] regions
-                //for (var i = 0; i < Participants.length; i++) {
-                //    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
-                //    ParticipantOrders.push(CurrentOrders);
-                //    for (var j = 0; j < CurrentOrders.length; j++) {
-                //        if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
-                //            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
-				//			NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
-                //            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
-                //        }
-                //    }
-                //    //Clear away the orders as they are no longer needed
-                //    gapi.hangout.data.clearValue("Orders_" + Participants[i]);
-                //}
+                for (var i = 0; i < Participants.length; i++) {
+                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
+                    ParticipantOrders.push(CurrentOrders);
+                    for (var j = 0; j < CurrentOrders.length; j++) {
+                        if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
+                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
+							NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
+                        }
+                    }
+                    //Clear away the orders as they are no longer needed
+                    gapi.hangout.data.clearValue("Orders_" + Participants[i]);
+                }
                 //Calculate all supports
-                //for (var i = 0; i < ParticipantOrders.length; i++) {
-                //    for (var j = 0; j < ParticipantOrders[i].length; j++) {
-                //        if (ParticipantOrders[i][j].isSupport 
-				//		&& NextGameStatus[ParticipantOrders[i][j].RecievingUnit].UnitArray.length == 0) {
-                //            //Look through the destination for the support target
-                //            for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
-                //                if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
-                //                    NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
-                //                    //Only one ally unit can be supported per support
-                //                    break;
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
-				//alert("Prior commit");
+                for (var i = 0; i < ParticipantOrders.length; i++) {
+                    for (var j = 0; j < ParticipantOrders[i].length; j++) {
+                        if (ParticipantOrders[i][j].isSupport 
+						&& NextGameStatus[ParticipantOrders[i][j].RecievingUnit].UnitArray.length == 0) {
+                            //Look through the destination for the support target
+                            for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
+                                if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
+                                    NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
+                                    //Only one ally unit can be supported per support
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+				alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
-				var mustAlert = false;
 				for (var i = 0; i < NextGameStatus.length; i++) {
 					if (NextGameStatus[i].Unit != null) {
 						NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
 						NextGameStatus[i].Unit = null;
-						mustAlert = true;
-						alert("very reachable code");
 					}
 				}
-				//alert("After stationary");
-                ////Resolve all conflicts
-                //for (var i = 0; i < NextGameStatus.length; i++) {
-				//	try {
-                //    ProcessMoveConflicts(NextGameStatus, i);
-				//	} catch (stupidError) {
-				//		alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
-				//	}
-                //}
+				alert("After stationary");
+                //Resolve all conflicts
+                for (var i = 0; i < NextGameStatus.length; i++) {
+					try {
+                    ProcessMoveConflicts(NextGameStatus, i);
+					} catch (stupidError) {
+						alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
+					}
+                }
 				alert("Unit commit start");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
@@ -194,8 +192,6 @@
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
                     } else if (NextGameStatus[i].UnitArray.length > 1) {
 						alert("Too long" + NextGameStatus[i].UnitArray.length);
-					} else if (mustAlert) {
-						alert("Unreachable code");
 					}
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
