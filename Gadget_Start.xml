@@ -66,6 +66,7 @@
             gapi.hangout.data.onStateChanged.add(
                 function(eventObj) {
                     //Only one client does the calculations
+                    alert(gapi.hangout.data.getValue("GameMaster") + " " + GetParticipantID());
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
