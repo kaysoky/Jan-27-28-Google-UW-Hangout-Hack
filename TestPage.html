@@ -1,27 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<Module>
-  <ModulePrefs title="Your App Name">
-    <Require feature="rpc"/>
-    <Require feature="views"/>
-  </ModulePrefs>
-  <Content type="html">
-    <![CDATA[
-      <script type="text/javascript" src="//www.google.com/jsapi"></script>
-      <script type="text/javascript">google.load("jquery", "1.3.2");</script>
-      <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
-      
-      <script type="text/javascript">
-      
-      <!-- Start application code here -->      
-      gapi.hangout.onApiReady.add(
-          function(eventObj) {
-              if (eventObj.isApiReady) {
-                  //window.onload
-                  CreatePlayingField(PlayingFieldData);
-              }
-          }
-      );
-      var CreatePlayingField = function(Array_LandData) {
+<html>
+    <head>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
+
+        <script type="text/javascript">
+
+        <!-- Start application code here -->
+        window.onload = function () {
+            CreatePlayingField(PlayingFieldData);
+        };
+        
+        var CreatePlayingField = function(Array_LandData) {
             var body = window.document.getElementsByTagName("BODY")[0];
             //Create the background with the Node connectors
             (function () {
@@ -31,6 +20,11 @@
                 Background.style.top = "0px";
                 Background.width = body.offsetWidth;
                 Background.height = body.offsetHeight;
+                
+                //-----DEBUG
+                Background.width = window.innerWidth;
+                Background.height = window.innerHeight;
+                //-----
                 
                 body.appendChild(Background);
                 var context = Background.getContext("2d");
@@ -127,9 +121,9 @@
             , { X: 0.8, Y: 0.8, Width: 0.05, Height: 0.1, Label: 48, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [47, 49, 38], CostalRestrictions: [[]] }
             , { X: 0.9, Y: 0.8, Width: 0.05, Height: 0.1, Label: 49, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [48, 39], CostalRestrictions: [[]] }
         ];
-      <!-- End application code here -->
-      
-      </script>
-    ]]>
-  </Content>
-</Module>
+        <!-- End application code here -->
+        </script>
+    </head> 
+
+    <body></body>
+</html>
