@@ -98,8 +98,10 @@
                             ProcessMoveQueue();
                         }
                     }
+					alert("Begin next turn");
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
+						alert("Enters if");
                         //Display which blocks have units
                         var gameState = GetCurrentGameState();
                         for (var i = 0; i < gameState.length; i++) {
@@ -110,6 +112,7 @@
                             }
                         }
                     }
+					alert("End next turn");
                 }
             );
         } else {
