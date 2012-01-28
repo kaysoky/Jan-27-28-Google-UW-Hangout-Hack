@@ -175,7 +175,7 @@
 					try {
                     ProcessMoveConflicts(NextGameStatus, i);
 					} catch (stupidError) {
-						alert(stupidError + " ~ " + NextGameStatus[i].UnitArray);
+						alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
 					}
                 }
 				alert("Unit commit start");
