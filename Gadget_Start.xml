@@ -15,10 +15,7 @@
       gapi.hangout.onApiReady.add(
           function(eventObj) {
               if (eventObj.isApiReady) {
-                  var screen = window.document.getElementsByTagName("HTML")[0];
-                  var body = window.document.createElement("body");
-                  body.appendChild(window.document.createTextNode("This had better show up"));
-                  screen.appendchild(body);
+                  var body = $('body').css('background-color', 'red');
               }
           }
       );
