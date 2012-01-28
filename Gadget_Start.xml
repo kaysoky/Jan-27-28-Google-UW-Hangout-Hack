@@ -32,7 +32,7 @@
                         //Decide whom calculates the data of the game
                         gapi.hangout.data.submitDelta( 
                           { "GameMaster": gapi.hangout.getParticipantId() 
-                          , "CurrentGameState": "" + JSON.stringify(PlayingFieldData)
+                          //, "CurrentGameState": "" + JSON.stringify(PlayingFieldData)
                           , "CurrentGameTurn": "0"
                           } );
                         alert("Totally initialized");
