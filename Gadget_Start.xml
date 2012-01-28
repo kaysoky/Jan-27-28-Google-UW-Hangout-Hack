@@ -21,7 +21,7 @@
         } catch (notGoogle) {
             isHangout = false;
         }
-      var CurrentGameTurn = 0;
+        var CurrentGameTurn = 0;
         
         if (isHangout) {
             gapi.hangout.onApiReady.add(
@@ -30,10 +30,10 @@
                         Initialize();
                         alert("Finished Initialization");
                         //Decide whom calculates the data of the game
-                        gapi.hangout.data.submitDelta( { key: "GameMaster", value: gapi.hangout.getParticipantId() } );
-                        gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(PlayingFieldData) } );
-                        gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "0" } );
-                        alert("Submitted initialized data");
+                        gapi.hangout.data.submitDelta( { "GameMaster": gapi.hangout.getParticipantId() } );
+                        gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
+                        gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
+                        alert("Totally Finished Initialization");
                     }
                 }
             );
@@ -129,8 +129,8 @@
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
-                gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(NextGameStatus) } );
-                gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
+                gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(NextGameStatus) } );
+                gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
                     
@@ -244,7 +244,7 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                gapi.hangout.data.submitDelta( { key: "Orders_" + gapi.hangout.getParticipantId(), value: JSON.stringify(PlayerOrders) } );
+                gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
             } else {
                 ProcessMoveQueue();
             }
@@ -252,7 +252,6 @@
         
         var Initialize = function() {
             CreatePlayingField(PlayingFieldData);
-            alert("Created Playing Field");
             
             var body = window.document.getElementsByTagName("BODY")[0];
             var PlayingField = window.document.getElementById("PlayingField");
@@ -275,8 +274,6 @@
                     SentMovesToState();
                 }
             );
-            
-            alert("End Turn button made");
         };
         
         var CreatePlayingField = function(Array_LandData) {
@@ -325,7 +322,6 @@
                     }
                 }
             }) ();
-            alert("Background drawn");
             
             for (var i = 0; i < Array_LandData.length; i++) {
                 var block = window.document.createElement("div");
@@ -342,7 +338,6 @@
                 block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
                 PlayingField.appendChild(block);
             }
-            alert("Blocks draw");
         };
 
         //Look at PlayingFieldData.xcls for the construction of this data

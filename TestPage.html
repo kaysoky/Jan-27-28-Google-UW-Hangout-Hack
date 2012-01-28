@@ -22,9 +22,9 @@
                     if (eventObj.isApiReady) {
                         Initialize();
                         //Decide whom calculates the data of the game
-                        gapi.hangout.data.submitDelta( { key: "GameMaster", value: gapi.hangout.getParticipantId() } );
-                        gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(PlayingFieldData) } );
-                        gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "0" } );
+                        gapi.hangout.data.submitDelta( { "GameMaster": gapi.hangout.getParticipantId() } );
+                        gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
+                        gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
                     }
                 }
             );
@@ -120,8 +120,8 @@
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
-                gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(NextGameStatus) } );
-                gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
+                gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(NextGameStatus) } );
+                gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
                     
@@ -235,7 +235,7 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                gapi.hangout.data.submitDelta( { key: "Orders_" + gapi.hangout.getParticipantId(), value: JSON.stringify(PlayerOrders) } );
+                gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
             } else {
                 ProcessMoveQueue();
             }
