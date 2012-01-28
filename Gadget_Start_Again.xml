@@ -122,6 +122,7 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
+				alert("start process");
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -156,11 +157,13 @@
                         }
                     }
                 }
+				alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
 				for (var i = 0; i < NextGameStatus.length; i++) {
 					NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
 					NextGameStatus[i].Unit = null;
 				}
+				alert("After stationary");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
