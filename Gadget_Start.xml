@@ -35,10 +35,10 @@
               var block = window.document.createElement("div");
               block.id = "Block" + i;
               block.style.position = "absolute";
-              block.style.left = Array_LandData[i].X + "%";
-              block.style.top = Array_LandData[i].Y + "%";
-              block.style.width = Array_LandData[i].Width + "%";
-              block.style.height = Array_LandData[i].Height + "%";
+              block.style.left = 100 * Array_LandData[i].X + "%";
+              block.style.top = 100 * Array_LandData[i].Y + "%";
+              block.style.width = 100 * Array_LandData[i].Width + "%";
+              block.style.height = 100 * Array_LandData[i].Height + "%";
               block.style.backgroundColor = "rgb(" + i + ", 0, 0)";
               PlayingField.appendChild(block);
           }
