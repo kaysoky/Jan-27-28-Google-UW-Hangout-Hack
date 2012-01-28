@@ -6,6 +6,18 @@
         <script type="text/javascript">
         
         <!-- Start application code here -->
+        var DePeriodExpression = new RegExp("(\\W+)", "g");
+        var GetParticipantID = function () {
+            return gapi.hangout.getParticipantId().replace(DePeriodExpression, "");
+        };
+        var GetParticipantIDs = function () {
+            var parties = gapi.hangout.getParticipants();
+            var IDs = [];
+            for (var i = 0; i < parties.length; i++) {
+                IDs.push(parties[i].id.replace(DePeriodExpression, ""));
+            }
+            return IDs;
+        };
         var isHangout;
         try {
             if (gapi != null) {
@@ -22,7 +34,7 @@
                     if (eventObj.isApiReady) {
                         Initialize();
                         //Decide whom calculates the data of the game
-                        gapi.hangout.data.submitDelta( { "GameMaster": gapi.hangout.getParticipantId() } );
+                        gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
                         gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
                     }
@@ -31,12 +43,12 @@
             gapi.hangout.data.onStateChanged.add(
                 function(eventObj) {
                     //Only one client does the calculations
-                    if (gapi.hangout.data.getValue("GameMaster") == gapi.hangout.getParticipantId()) {
-                        var Participants = gapi.hangout.getParticipants();
+                    if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
+                        var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
                         for (var i = 0; i < Participants.length; i++) {
                             try {
-                                if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id)) == null) {
+                                if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
                                     AllMovesSubmitted = false;
                                 }
                             } catch (notThere) {
@@ -70,13 +82,13 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
-                var Participants = gapi.hangout.getParticipants();
+                var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
                 var NextGameStatus = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
                 //Move all units into their new [contested] regions
                 for (var i = 0; i < Participants.length; i++) {
-                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id));
+                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
                     ParticipantOrders.push(CurrentOrders);
                     for (var j = 0; j < CurrentOrders.length; j++) {
                         if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
@@ -86,7 +98,7 @@
                         }
                     }
                     //Clear away the orders as they are no longer needed
-                    gapi.hangout.data.clearValue("Orders_" + Participants[i].id);
+                    gapi.hangout.data.clearValue("Orders_" + Participants[i]);
                 }
                 //Calculate all supports
                 for (var i = 0; i < ParticipantOrders.length; i++) {
@@ -235,7 +247,7 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                var key = "Orders_" + gapi.hangout.getParticipantId();
+                var key = "Orders_" + GetParticipantID();
                 eval("gapi.hangout.data.submitDelta( { " + key + ": JSON.stringify(PlayerOrders) } );");
                 //gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
             } else {
