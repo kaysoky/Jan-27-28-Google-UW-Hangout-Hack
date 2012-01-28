@@ -68,12 +68,10 @@
                     //Only one client does the calculations
 					var gameMaster = gapi.hangout.data.getValue("GameMaster");
 					var participant = GetParticipantID();
-					alert(gameMaster == participant);
+					alert("Should do process = " + (gameMaster == participant));
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
-						alert("1");
                         var AllMovesSubmitted = true;
-						alert("2");
                         for (var i = 0; i < Participants.length; i++) {
                             try {
                                 if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
@@ -83,12 +81,12 @@
                                 AllMovesSubmitted = false;
                             }
                         }
-						alert("3");
+						alert("Start process");
                         if (AllMovesSubmitted) {
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
-						alert("4");
+						alert("End process");
                     }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
@@ -112,6 +110,7 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
+				alert("1");
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -130,6 +129,7 @@
                     //Clear away the orders as they are no longer needed
                     gapi.hangout.data.clearValue("Orders_" + Participants[i]);
                 }
+				alert("2");
                 //Calculate all supports
                 for (var i = 0; i < ParticipantOrders.length; i++) {
                     for (var j = 0; j < ParticipantOrders[i].length; j++) {
@@ -145,10 +145,12 @@
                         }
                     }
                 }
+				alert("3");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
                 }
+				alert("4");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
@@ -159,11 +161,13 @@
                     //Reset the support to zero
                     NextGameStatus[i].Unit.SupportStrength = 0;
                 }
+				alert("5");
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
                 SetCurrentGameState(NextGameStatus);
                 gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
+				alert("6");
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
                     
