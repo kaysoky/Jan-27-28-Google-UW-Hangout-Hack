@@ -256,7 +256,7 @@
                                     //Process the location the Unit was pushed back to 
                                     ProcessMoveConflicts(NextGameStatus, NextGameStatus[Location].UnitArray[j].OriginalLocation);
                                     //Remove the Unit from this location
-                                    NextGameStatus[Location].UnitArray.splice(j, 1);
+                                    NextGameStatus[Location].UnitArray.remove(j);
                                     //Maintain the "i" value so that it points to the same Unit
                                     if (j < i) {
                                         i--;
@@ -274,13 +274,11 @@
                             if (emptyAdjacents.length > 0) {
                                 var retreatIndex = Math.floor(Math.random() * emptyAdjacents.length);
                                 emptyAdjacents[retreatIndex].UnitArray.push(NextGameStatus[Location].UnitArray[i])
-                                NextGameStatus[Location].UnitArray.splice(i, 1);
-                                i--;
+                                NextGameStatus[Location].UnitArray.remove(i--);
                             } else {
                                 //Doom, Death, No Retreat
 								alert("Unit Removed");
-                                NextGameStatus[Location].UnitArray.splice(i, 1);
-                                i--;
+                                NextGameStatus[Location].UnitArray.remove(i--);
                             }
                         } else {
                             //Push the Unit back to its original location
