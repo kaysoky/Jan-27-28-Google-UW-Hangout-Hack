@@ -28,10 +28,12 @@
                 function(eventObj) {
                     if (eventObj.isApiReady) {
                         Initialize();
+                        alert("Finished Initialization");
                         //Decide whom calculates the data of the game
                         gapi.hangout.data.submitDelta( { key: "GameMaster", value: gapi.hangout.getParticipantId() } );
                         gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(PlayingFieldData) } );
                         gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "0" } );
+                        alert("Submitted initialized data");
                     }
                 }
             );
@@ -250,6 +252,7 @@
         
         var Initialize = function() {
             CreatePlayingField(PlayingFieldData);
+            alert("Created Playing Field");
             
             var body = window.document.getElementsByTagName("BODY")[0];
             var PlayingField = window.document.getElementById("PlayingField");
@@ -272,6 +275,8 @@
                     SentMovesToState();
                 }
             );
+            
+            alert("End Turn button made");
         };
         
         var CreatePlayingField = function(Array_LandData) {
@@ -320,6 +325,7 @@
                     }
                 }
             }) ();
+            alert("Background drawn");
             
             for (var i = 0; i < Array_LandData.length; i++) {
                 var block = window.document.createElement("div");
@@ -336,6 +342,7 @@
                 block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
                 PlayingField.appendChild(block);
             }
+            alert("Blocks draw");
         };
 
         //Look at PlayingFieldData.xcls for the construction of this data
