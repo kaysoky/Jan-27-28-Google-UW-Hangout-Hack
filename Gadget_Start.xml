@@ -28,12 +28,11 @@
                 function(eventObj) {
                     if (eventObj.isApiReady) {
                         Initialize();
-                        alert("Finished Initialization");
                         //Decide whom calculates the data of the game
                         gapi.hangout.data.submitDelta( { "GameMaster": gapi.hangout.getParticipantId() } );
                         gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
-                        alert("Totally Finished Initialization");
+                        alert("Totally initialized");
                     }
                 }
             );
@@ -244,7 +243,9 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
+                var key = "Orders_" + gapi.hangout.getParticipantId();
+                eval("gapi.hangout.data.submitDelta( { " + key + ": JSON.stringify(PlayerOrders) } );");
+                //gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
             } else {
                 ProcessMoveQueue();
             }

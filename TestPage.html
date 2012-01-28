@@ -235,7 +235,9 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
+                var key = "Orders_" + gapi.hangout.getParticipantId();
+                eval("gapi.hangout.data.submitDelta( { " + key + ": JSON.stringify(PlayerOrders) } );");
+                //gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
             } else {
                 ProcessMoveQueue();
             }
