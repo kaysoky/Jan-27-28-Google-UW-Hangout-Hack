@@ -66,7 +66,7 @@
             gapi.hangout.data.onStateChanged.add(
                 function(eventObj) {
                     //Only one client does the calculations
-                    alert(gapi.hangout.data.getValue("GameMaster") + " " + GetParticipantID());
+                    alert("is game master = " + (gapi.hangout.data.getValue("GameMaster") + " " + GetParticipantID()));
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
@@ -107,6 +107,7 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
+                alert("start move process");
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -125,6 +126,7 @@
                     //Clear away the orders as they are no longer needed
                     gapi.hangout.data.clearValue("Orders_" + Participants[i]);
                 }
+                alert("processes prelim moves");
                 //Calculate all supports
                 for (var i = 0; i < ParticipantOrders.length; i++) {
                     for (var j = 0; j < ParticipantOrders[i].length; j++) {
@@ -140,6 +142,7 @@
                         }
                     }
                 }
+                alert("end calc support");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
@@ -154,6 +157,7 @@
                     //Reset the support to zero
                     NextGameStatus[i].Unit.SupportStrength = 0;
                 }
+                alert("end commit moves");
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
