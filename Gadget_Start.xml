@@ -60,7 +60,6 @@
                         gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
                         SetCurrentGameState(PlayingFieldData);
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
-                        alert("done");
                     }
                 }
             );
@@ -96,6 +95,7 @@
                             }
                         }
                     }
+                    alert("event ended");
                 }
             );
         } else {
