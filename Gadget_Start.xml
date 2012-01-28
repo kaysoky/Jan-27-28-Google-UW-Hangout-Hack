@@ -82,9 +82,6 @@
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
-                    } else {                    
-                        alert("is game master = " + (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()));
-                        alert(gapi.hangout.data.getValue("GameMaster") + "<br />" + GetParticipantID());
                     }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
