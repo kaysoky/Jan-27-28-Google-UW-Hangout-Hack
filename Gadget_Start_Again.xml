@@ -166,7 +166,7 @@
                 //        }
                 //    }
                 //}
-				alert("Prior commit");
+				//alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
 				for (var i = 0; i < NextGameStatus.length; i++) {
 					if (NextGameStatus[i].Unit != null) {
@@ -174,15 +174,15 @@
 						NextGameStatus[i].Unit = null;
 					}
 				}
-				alert("After stationary");
-                //Resolve all conflicts
-                for (var i = 0; i < NextGameStatus.length; i++) {
-					try {
-                    ProcessMoveConflicts(NextGameStatus, i);
-					} catch (stupidError) {
-						alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
-					}
-                }
+				//alert("After stationary");
+                ////Resolve all conflicts
+                //for (var i = 0; i < NextGameStatus.length; i++) {
+				//	try {
+                //    ProcessMoveConflicts(NextGameStatus, i);
+				//	} catch (stupidError) {
+				//		alert(stupidError + " ~ " + NextGameStatus[i] + " ~ " + NextGameStatus[i].UnitArray + " ~ " + NextGameStatus[i].UnitArray.length);
+				//	}
+                //}
 				alert("Unit commit start");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
