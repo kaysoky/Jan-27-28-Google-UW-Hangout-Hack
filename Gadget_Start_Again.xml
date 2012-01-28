@@ -68,7 +68,6 @@
                     //Only one client does the calculations
 					var gameMaster = gapi.hangout.data.getValue("GameMaster");
 					var participant = GetParticipantID();
-					alert("Should do process = " + (gameMaster == participant));
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
@@ -110,7 +109,6 @@
         
         var ProcessMoveQueue = function () {
             if (isHangout) {
-				alert("1");
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
@@ -129,7 +127,6 @@
                     //Clear away the orders as they are no longer needed
                     gapi.hangout.data.clearValue("Orders_" + Participants[i]);
                 }
-				alert("2");
                 //Calculate all supports
                 for (var i = 0; i < ParticipantOrders.length; i++) {
                     for (var j = 0; j < ParticipantOrders[i].length; j++) {
@@ -145,14 +142,12 @@
                         }
                     }
                 }
-				alert("3");
                 //Resolve all conflicts
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
                 }
 				alert("4");
                 for (var i = 0; i < NextGameStatus.length; i++) {
-					alert("4.1");
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
@@ -161,7 +156,9 @@
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
                     //Reset the support to zero
-                    NextGameStatus[i].Unit.SupportStrength = 0;
+					if (NextGameStatus[i].Unit != null) {
+						NextGameStatus[i].Unit.SupportStrength = 0;
+					}
 					alert("4.3");
                 }
 				alert("5");
