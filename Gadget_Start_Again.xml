@@ -60,6 +60,19 @@
                         gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
                         SetCurrentGameState(PlayingFieldData);
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
+						
+						//DEBUG Seed the game with units
+						var gameState = GetCurrentGameState();
+						for (var i = 0; i < gameState.length; i++) {
+							if (gameState[i].isSupplyCenter) {
+								gameState[i].Unit = 
+								{
+									OwnerID: GetParticipantID()
+									, SupportStrength: 1.5
+									, isArmy: true
+								};
+							}
+						}
                     }
                 }
             );
@@ -80,12 +93,10 @@
                                 AllMovesSubmitted = false;
                             }
                         }
-						alert("Start process");
                         if (AllMovesSubmitted) {
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
-						alert("End process");
                     }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
@@ -146,7 +157,6 @@
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
                 }
-				alert("1");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
@@ -159,16 +169,15 @@
 						NextGameStatus[i].Unit.SupportStrength = 0;
 					}
                 }
-				alert("2");
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
                 SetCurrentGameState(NextGameStatus);
                 gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
-				alert("3");
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
-                    
+                    //For test .html debug version
+					//Too lazy to complete
                 }
             }
         };
