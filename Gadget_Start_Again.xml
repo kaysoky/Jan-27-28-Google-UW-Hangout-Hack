@@ -68,6 +68,7 @@
                     //Only one client does the calculations
 					var gameMaster = gapi.hangout.data.getValue("GameMaster");
 					var participant = GetParticipantID();
+					alert(gameMaster + "<br />" + participant);
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
@@ -84,9 +85,7 @@
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
-                    } else {
-						alert(gameMaster + "<br />" + participant);
-					}
+                    }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
                         //Display which blocks have units
