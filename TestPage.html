@@ -4,29 +4,136 @@
         <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
 
         <script type="text/javascript">
-
+        var isHangout;
+        try {
+            if (gapi != null) {
+                isHangout = true;
+            }
+        } catch (notGoogle) {
+            isHangout = false;
+        }
         <!-- Start application code here -->
-        window.onload = function () {
+        if (isHangout) {
+            gapi.hangout.onApiReady.add(
+                function(eventObj) {
+                    if (eventObj.isApiReady) {
+                        Initialize();
+                        //Decide whom calculates the data of the game
+                        gapi.hangout.data.submitDelta( { key: "GameMaster", value: gapi.hangout.getParticipantId() } );
+                        gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(PlayingFieldData) } );
+                        gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "0" } );
+                    }
+                }
+            );
+            gapi.hangout.data.onStateChanged.add(
+                function(eventObj) {
+                    //Only one client does the calculations
+                    if (gapi.hangout.data.getValue("GameMaster") == gapi.hangout.getParticipantId()) {
+                        var Participants = gapi.hangout.getParticipants();
+                        var AllMovesSubmitted = true;
+                        for (var i = 0; i < Participants.length; i++) {
+                            try {
+                                if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id)) == null) {
+                                    AllMovesSubmitted = false;
+                                }
+                            } catch (notThere) {
+                                AllMovesSubmitted = false;
+                            }
+                        }
+                        if (AllMovesSubmitted) {
+                            ProcessMoveQueue();
+                        }
+                    }
+                }
+            );
+        } else {
+            window.onload = function () {
+                Initialize();
+            };
+        }
+        
+        var ProcessMoveQueue = function () {
+            if (isHangout) {
+                var Participants = gapi.hangout.getParticipants();
+                var AllMovesSubmitted = true;
+                var CurrentGameStatus = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
+                var NextGameStatus = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
+                for (var i = 0; i < Participants.length; i++) {
+                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id));
+                    for (var j = 0; j < CurrentOrders.length; j++) {
+                        NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+                        NextGameStatus[CurrentOrders[i].RecievingUnit].Unit;
+                    }
+                    gapi.hangout.data.clearValue("Orders_" + Participants[i].id);
+                }
+            } else {
+                for (var i = 0; i < PlayerOrders.length; i++) {
+                    
+                }
+            }
+        };
+        
+        /*
+        Array 
+            
+        */
+        var PlayerOrders = [];
+        var SentMovesToState = function() {
+            if (isHangout) {
+                gapi.hangout.data.submitDelta( { key: "Orders_" + gapi.hangout.getParticipantId(), value: JSON.stringify(PlayerOrders) } );
+            } else {
+                ProcessMoveQueue();
+            }
+        };
+        
+        var Initialize = function() {
             CreatePlayingField(PlayingFieldData);
+            
+            var body = window.document.getElementsByTagName("BODY")[0];
+            var PlayingField = window.document.getElementById("PlayingField");
+            
+            //Create the end turn button
+            var EndTurn = window.document.createElement("div");
+            EndTurn.style.position = "absolute";
+            EndTurn.style.left = PlayingField.offsetWidth + "px";
+            EndTurn.style.top = "0px";
+            EndTurn.style.width = (body.offsetWidth - PlayingField.offsetWidth) + "px";
+            EndTurn.style.height = PlayingField.offsetHeight + "px";
+            EndTurn.style.textAlign = "center";
+            EndTurn.style.backgroundColor = "rgb(0, 0, 200)";
+            body.appendChild(EndTurn);
+            EndTurn.appendChild(window.document.createTextNode("End Turn"));
+            EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
+        
+            EndTurn.addEventListener("mousedown"
+                , function (evt) {
+                    SentMovesToState();
+                }
+            );
         };
         
         var CreatePlayingField = function(Array_LandData) {
             var body = window.document.getElementsByTagName("BODY")[0];
+            
+            var PlayingField = window.document.createElement("div");
+            PlayingField.id = "PlayingField";
+            PlayingField.style.position = "absolute";
+            PlayingField.style.left = "0px";
+            PlayingField.style.top = "0px";
+            PlayingField.style.width = "90%";
+            PlayingField.style.height = "100%";
+            body.appendChild(PlayingField);
+            
             //Create the background with the Node connectors
             (function () {
                 var Background = window.document.createElement("canvas");
                 Background.style.position = "absolute"
                 Background.style.left = "0px";
                 Background.style.top = "0px";
-                Background.width = body.offsetWidth;
-                Background.height = body.offsetHeight;
+                Background.width = PlayingField.offsetWidth;
+                Background.height = PlayingField.offsetHeight;
+                body.insertBefore(Background, PlayingField);
                 
-                //-----DEBUG
-                Background.width = window.innerWidth;
-                Background.height = window.innerHeight;
-                //-----
-                
-                body.appendChild(Background);
                 var context = Background.getContext("2d");
                 context.lineStyle = "rgb(0, 0, 0)";
                 context.lineWidth = 5;
@@ -34,6 +141,8 @@
                 for (var i = 0; i < Array_LandData.length; i++) {
                     Array_LandData[i].StartX = Background.width * (Array_LandData[i].X + Array_LandData[i].Width / 2);
                     Array_LandData[i].StartY = Background.height * (Array_LandData[i].Y + Array_LandData[i].Height / 2);
+                    //Also make the calculation structure for unit moving
+                    Array_LandData[i].UnitArray = [];
                 }
                 for (var i = 0; i < Array_LandData.length; i++) {
                     for (var j = 0; j < Array_LandData[i].Connections.length; j++) {
@@ -46,14 +155,6 @@
                 }
             }) ();
             
-            var PlayingField = window.document.createElement("div");
-            PlayingField.id = "PlayingField";
-            PlayingField.style.position = "absolute";
-            PlayingField.style.left = "0px";
-            PlayingField.style.top = "0px";
-            PlayingField.style.width = "100%";
-            PlayingField.style.height = "100%";
-            body.appendChild(PlayingField);
             for (var i = 0; i < Array_LandData.length; i++) {
                 var block = window.document.createElement("div");
                 block.id = "Block" + i;
@@ -68,6 +169,20 @@
         };
 
         //Look at PlayingFieldData.xcls for the construction of this data
+        /*
+        Array
+            DataStructure
+                X
+                Y
+                Width
+                Height
+                Label
+                acceptsArmy
+                acceptsFleet
+                isSupplyCenter
+                Connections (Array)
+                CostalRestrictions (Array of Array)
+        */
         var PlayingFieldData =
         [
             { X: 0, Y: 0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 10], CostalRestrictions: [[]] }

@@ -21,18 +21,33 @@
               }
           }
       );
+      gapi.hangout.data.onStateChanged.add(
+          function(eventObj) {
+          
+          }
+      );
       var CreatePlayingField = function(Array_LandData) {
             var body = window.document.getElementsByTagName("BODY")[0];
+            
+            var PlayingField = window.document.createElement("div");
+            PlayingField.id = "PlayingField";
+            PlayingField.style.position = "absolute";
+            PlayingField.style.left = "0px";
+            PlayingField.style.top = "0px";
+            PlayingField.style.width = "100%";
+            PlayingField.style.height = "100%";
+            body.appendChild(PlayingField);
+            
             //Create the background with the Node connectors
             (function () {
                 var Background = window.document.createElement("canvas");
                 Background.style.position = "absolute"
                 Background.style.left = "0px";
                 Background.style.top = "0px";
-                Background.width = body.offsetWidth;
-                Background.height = body.offsetHeight;
+                Background.width = PlayingField.offsetWidth;
+                Background.height = PlayingField.offsetHeight;
+                body.insertBefore(Background, PlayingField);
                 
-                body.appendChild(Background);
                 var context = Background.getContext("2d");
                 context.lineStyle = "rgb(0, 0, 0)";
                 context.lineWidth = 5;
@@ -52,14 +67,6 @@
                 }
             }) ();
             
-            var PlayingField = window.document.createElement("div");
-            PlayingField.id = "PlayingField";
-            PlayingField.style.position = "absolute";
-            PlayingField.style.left = "0px";
-            PlayingField.style.top = "0px";
-            PlayingField.style.width = "100%";
-            PlayingField.style.height = "100%";
-            body.appendChild(PlayingField);
             for (var i = 0; i < Array_LandData.length; i++) {
                 var block = window.document.createElement("div");
                 block.id = "Block" + i;
@@ -74,6 +81,20 @@
         };
 
         //Look at PlayingFieldData.xcls for the construction of this data
+        /*
+        Array
+            DataStructure
+                X
+                Y
+                Width
+                Height
+                Label
+                acceptsArmy
+                acceptsFleet
+                isSupplyCenter
+                Connections (Array)
+                CostalRestrictions (Array of Array)
+        */
         var PlayingFieldData =
         [
             { X: 0, Y: 0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [1, 10], CostalRestrictions: [[]] }
