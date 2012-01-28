@@ -166,8 +166,10 @@
 				alert("Prior commit");
 				//Put all stationary Units in their own UnitArrays
 				for (var i = 0; i < NextGameStatus.length; i++) {
-					NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
-					NextGameStatus[i].Unit = null;
+					if (NextGameStatus[i].Unit != null) {
+						NextGameStatus[i].UnitArray.push(NextGameStatus[i].Unit);
+						NextGameStatus[i].Unit = null;
+					}
 				}
 				alert("After stationary");
                 //Resolve all conflicts
