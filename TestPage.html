@@ -6,6 +6,7 @@
         <script type="text/javascript">
         
         <!-- Start application code here -->
+        //Gets rid of periods in the participant IDs
         var DePeriodExpression = new RegExp("(\\W+)", "g");
         var GetParticipantID = function () {
             return gapi.hangout.getParticipantId().replace(DePeriodExpression, "");
@@ -17,6 +18,21 @@
                 IDs.push(parties[i].id.replace(DePeriodExpression, ""));
             }
             return IDs;
+        };
+        //Breaks up the GameState into many, many objects so that no string limits are reached
+        var GetCurrentGameState = function () {
+            var length = parseInt(gapi.hangout.data.getValue("GameStateLength"));
+            var gameState = [];
+            for (var i = 0; i < length; i++) {
+                gameState.push(JSON.parse(gapi.hangout.data.getValue("CurrentGameState" + i)));
+            }
+            return gameState;
+        };
+        var SetCurrentGameState = function (gameState) {
+            gapi.hangout.data.submitDelta( { "GameStateLength": "" + gameState.length } );
+            for (var i = 0; i < gameState.length; i++) {
+                eval("gapi.hangout.data.submitDelta( { CurrentGameState" + i + ": JSON.stringify(gameState[i]) } );");
+            }
         };
         var isHangout;
         try {
@@ -35,7 +51,7 @@
                         Initialize();
                         //Decide whom calculates the data of the game
                         gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
-                        gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(PlayingFieldData) } );
+                        SetCurrentGameState(PlayingFieldData);
                         gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
                     }
                 }
@@ -63,7 +79,7 @@
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
                         //Display which blocks have units
-                        var gameState = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
+                        var gameState = GetCurrentGameState();
                         for (var i = 0; i < gameState.length; i++) {
                             if (gameState[i].Unit != null) {
                                 window.document.getElementById("Block" + i).innerHTML = "Unit";
@@ -85,7 +101,7 @@
                 var Participants = GetParticipantIDs();
                 var ParticipantOrders = [];
                 var AllMovesSubmitted = true;
-                var NextGameStatus = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
+                var NextGameStatus = GetCurrentGameState();
                 //Move all units into their new [contested] regions
                 for (var i = 0; i < Participants.length; i++) {
                     var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i]));
@@ -132,7 +148,7 @@
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
-                gapi.hangout.data.submitDelta( { "CurrentGameState": JSON.stringify(NextGameStatus) } );
+                SetCurrentGameState(NextGameStatus);
                 gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
@@ -247,9 +263,7 @@
         var PlayerOrders = [];
         var SentMovesToState = function() {
             if (isHangout) {
-                var key = "Orders_" + GetParticipantID();
-                eval("gapi.hangout.data.submitDelta( { " + key + ": JSON.stringify(PlayerOrders) } );");
-                //gapi.hangout.data.submitDelta( { ("Orders_" + gapi.hangout.getParticipantId()): JSON.stringify(PlayerOrders) } );
+                eval("gapi.hangout.data.submitDelta( { Orders_" + GetParticipantID() + ": JSON.stringify(PlayerOrders) } );");
             } else {
                 ProcessMoveQueue();
             }
