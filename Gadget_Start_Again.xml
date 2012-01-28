@@ -104,8 +104,8 @@
                         var gameState = GetCurrentGameState();
                         for (var i = 0; i < gameState.length; i++) {
                             if (gameState[i].Unit != null) {
-                                window.document.getElementById("Block" + i).innerHTML = "Unit";
 								alert("display should change");
+                                window.document.getElementById("Block" + i).innerHTML = "Unit";
                             } else {
                                 window.document.getElementById("Block" + i).innerHTML = "";
                             }
@@ -268,6 +268,7 @@
                                 i--;
                             } else {
                                 //Doom, Death, No Retreat
+								alert("Unit Removed");
                                 NextGameStatus[Location].UnitArray.splice(i, 1);
                                 i--;
                             }
