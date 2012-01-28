@@ -95,7 +95,6 @@
                             }
                         }
                     }
-                    alert("event ended");
                 }
             );
         } else {
@@ -189,10 +188,8 @@
                         , SupportStrength: 0
                         , isArmy: true
                     };
-                    alert("unit created");
                 }
             }
-            alert("begin turn done");
         };
         var ProcessMoveConflicts = function (NextGameStatus, Location) {
             if (NextGameStatus[Location].UnitArray.length >= 1 ) {
