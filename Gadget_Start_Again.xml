@@ -76,12 +76,13 @@
                     }
                 }
             );
+			var isUpdating = false;
             gapi.hangout.data.onStateChanged.add(
                 function(eventObj) {
                     //Only one client does the calculations
 					var gameMaster = gapi.hangout.data.getValue("GameMaster");
 					var participant = GetParticipantID();
-                    if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
+                    if (!isUpdating && gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
                         var AllMovesSubmitted = true;
                         for (var i = 0; i < Participants.length; i++) {
@@ -94,8 +95,10 @@
                             }
                         }
                         if (AllMovesSubmitted) {
+							isUpdating = true;
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
+							isUpdating = false;
                         }
                     }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
