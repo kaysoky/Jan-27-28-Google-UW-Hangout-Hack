@@ -146,28 +146,26 @@
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     ProcessMoveConflicts(NextGameStatus, i);
                 }
-				alert("4");
+				alert("1");
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
                     }
-					alert("4.2");
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
                     //Reset the support to zero
 					if (NextGameStatus[i].Unit != null) {
 						NextGameStatus[i].Unit.SupportStrength = 0;
 					}
-					alert("4.3");
                 }
-				alert("5");
+				alert("2");
                 //Start the next turn
                 BeginTurn(NextGameStatus);
                 //Finally, submit the changed state
                 SetCurrentGameState(NextGameStatus);
                 gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
-				alert("6");
+				alert("3");
             } else {
                 for (var i = 0; i < PlayerOrders.length; i++) {
                     
