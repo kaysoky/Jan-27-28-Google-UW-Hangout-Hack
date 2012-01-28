@@ -13,20 +13,255 @@
       <script type="text/javascript">
       
       <!-- Start application code here -->      
-      gapi.hangout.onApiReady.add(
-          function(eventObj) {
-              if (eventObj.isApiReady) {
-                  //window.onload
-                  CreatePlayingField(PlayingFieldData);
-              }
-          }
-      );
-      gapi.hangout.data.onStateChanged.add(
-          function(eventObj) {
-          
-          }
-      );
-      var CreatePlayingField = function(Array_LandData) {
+      var isHangout;
+        try {
+            if (gapi != null) {
+                isHangout = true;
+            }
+        } catch (notGoogle) {
+            isHangout = false;
+        }
+        <!-- Start application code here -->
+        if (isHangout) {
+            gapi.hangout.onApiReady.add(
+                function(eventObj) {
+                    if (eventObj.isApiReady) {
+                        Initialize();
+                        //Decide whom calculates the data of the game
+                        gapi.hangout.data.submitDelta( { key: "GameMaster", value: gapi.hangout.getParticipantId() } );
+                        gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(PlayingFieldData) } );
+                        gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "0" } );
+                    }
+                }
+            );
+            gapi.hangout.data.onStateChanged.add(
+                function(eventObj) {
+                    //Only one client does the calculations
+                    if (gapi.hangout.data.getValue("GameMaster") == gapi.hangout.getParticipantId()) {
+                        var Participants = gapi.hangout.getParticipants();
+                        var AllMovesSubmitted = true;
+                        for (var i = 0; i < Participants.length; i++) {
+                            try {
+                                if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id)) == null) {
+                                    AllMovesSubmitted = false;
+                                }
+                            } catch (notThere) {
+                                AllMovesSubmitted = false;
+                            }
+                        }
+                        if (AllMovesSubmitted) {
+                            //This will clear the "Orders_" values in the State
+                            ProcessMoveQueue();
+                        }
+                    }
+                }
+            );
+        } else {
+            window.onload = function () {
+                Initialize();
+            };
+        }
+        
+        var ProcessMoveQueue = function () {
+            if (isHangout) {
+                var Participants = gapi.hangout.getParticipants();
+                var ParticipantOrders = [];
+                var AllMovesSubmitted = true;
+                var NextGameStatus = JSON.parse(gapi.hangout.data.getValue("CurrentGameState"));
+                //Move all units into their new [contested] regions
+                for (var i = 0; i < Participants.length; i++) {
+                    var CurrentOrders = JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i].id));
+                    ParticipantOrders.push(CurrentOrders);
+                    for (var j = 0; j < CurrentOrders.length; j++) {
+                        if (!CurrentOrders[i].isSupport && CurrentOrders[i].RecievingUnit != CurrentOrders[i].Destination) {
+                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit.OriginalLocation = CurrentOrders[i].RecievingUnit;
+                            NextGameStatus[CurrentOrders[i].Destination].UnitArray.push(NextGameStatus[CurrentOrders[i].RecievingUnit].Unit);
+                            NextGameStatus[CurrentOrders[i].RecievingUnit].Unit = null;
+                        }
+                    }
+                    //Clear away the orders as they are no longer needed
+                    gapi.hangout.data.clearValue("Orders_" + Participants[i].id);
+                }
+                //Calculate all supports
+                for (var i = 0; i < ParticipantOrders.length; i++) {
+                    for (var j = 0; j < ParticipantOrders[i].length; j++) {
+                        if (ParticipantOrders[i][j].isSupport) {
+                            //Look through the destination for the support target
+                            for (var k = 0; k < NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray.length; k++) {
+                                if (NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].OwnerID == ParticipantOrders[i][j].SupportForID) {
+                                    NextGameStatus[ParticipantOrders[i][j].Destination].UnitArray[k].SupportStrength++;
+                                    //Only one ally unit can be supported per support
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                //Resolve all conflicts
+                for (var i = 0; i < NextGameStatus.length; i++) {
+                    ProcessMoveConflicts(NextGameStatus, i);
+                }
+                for (var i = 0; i < NextGameStatus.length; i++) {
+                    //Commit the Unit moves
+                    if (NextGameStatus[i].UnitArray.length == 1) {
+                        NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
+                    }
+                    //Reset Unit arrays
+                    NextGameStatus[i].UnitArray = [];
+                    //Reset the support to zero
+                    NextGameStatus[i].Unit.SupportStrength = 0;
+                }
+                //Start the next turn
+                BeginTurn(NextGameStatus);
+                //Finally, submit the changed state
+                gapi.hangout.data.submitDelta( { key: "CurrentGameState", value: JSON.stringify(NextGameStatus) } );
+                gapi.hangout.data.submitDelta( { key: "CurrentGameTurn", value: "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
+            } else {
+                for (var i = 0; i < PlayerOrders.length; i++) {
+                    
+                }
+            }
+        };
+        var BeginTurn = function (NextGameStatus) {
+            for (var i = 0; i < NextGameStatus.length; i++) {
+                //Increment the Player's control over the regions
+                if (NextGameStatus[i].Unit != null) {
+                    //Convert enemy regions into Player regions
+                    if (NextGameStatus[i].OwnerID != NextGameStatus[i].Unit.OwnerID) {
+                        NextGameStatus[i].OwnerInfluence--;
+                        if (NextGameStatus[i].OwnerInfluence < 0) {
+                            NextGameStatus[i].OwnerID = NextGameStatus[i].Unit.OwnerID;
+                            NextGameStatus[i].OwnerInfluence *= -1;
+                        }
+                    } else {
+                        //Over time, influence converges to 3.0
+                        NextGameStatus[i].OwnerInfluence = 0.15 + 0.95 * NextGameStatus[i].OwnerInfluence;
+                    }
+                } else if (NextGameStatus[i].isSupplyCenter 
+                && NextGameStatus[i].OwnerInfluence > 1.5 
+                && NextGameStatus[i].OwnerID != null) {
+                    //This is the only place where units are created
+                    NextGameStatus[i].Unit = 
+                    {
+                        OwnerID: NextGameStatus[i].OwnerID
+                        , SupportStrength: 0
+                        , isArmy: true
+                    };
+                }
+            }
+        };
+        var ProcessMoveConflicts = function (NextGameStatus, Location) {
+            if (NextGameStatus[Location].UnitArray.length >= 1 ) {
+                var winner;
+                var winnerStrength = 0;
+                //Find the winner
+                for (var i = 0; i < NextGameStatus[Location].UnitArray.length; i++) {
+                    if (1 + NextGameStatus[Location].UnitArray[i].SupportStrength > winnerStrength) {
+                        winner = NextGameStatus[Location].UnitArray[i];
+                        winnerStrength = 1 + NextGameStatus[Location].UnitArray[i].SupportStrength;
+                    } else if (1 + NextGameStatus[Location].UnitArray[i].SupportStrength == winnerStrength) {
+                        winner = null;
+                    }
+                }
+                //Make all losers retreat
+                for (var i = 0; i < NextGameStatus[Location].UnitArray.length; i++) {
+                    if (NextGameStatus[Location].UnitArray[i] != winner) {
+                        //Bounce back losers
+                        //If losers bounce back to same area
+                        if (NextGameStatus[Location].UnitArray[i].OriginalLocation == Location) {
+                            //Bounce away allies and weaker enemies
+                            for (var j = 0; j < NextGameStatus[Location].UnitArray.length; j++) {
+                                if (i != j 
+                                    && (NextGameStatus[Location].UnitArray[j].OwnerID == NextGameStatus[Location].UnitArray[i].OwnerID
+                                        || NextGameStatus[Location].UnitArray[j].SupportStrength == 0)) {
+                                    //Push the Unit back to its original location
+                                    NextGameStatus[NextGameStatus[Location].UnitArray[j].OriginalLocation].UnitArray.push(NextGameStatus[Location].UnitArray[j]);
+                                    //Process the location the Unit was pushed back to 
+                                    ProcessMoveConflicts(NextGameStatus, NextGameStatus[Location].UnitArray[j].OriginalLocation);
+                                    //Remove the Unit from this location
+                                    NextGameStatus[Location].UnitArray.splice(j, 1);
+                                    //Maintain the "i" value so that it points to the same Unit
+                                    if (j < i) {
+                                        i--;
+                                    }
+                                }
+                            }
+                            //If a stronger force still exists, retreat
+                            var emptyAdjacents = [];
+                            for (var j = 0; j < NextGameStatus[Location].Connections.length; j++) {
+                                if (NextGameStatus[NextGameStatus[Location].Connections[j]].UnitArray.length == 0) {
+                                    emptyAdjacents.push(NextGameStatus[NextGameStatus[Location].Connections[j]]);
+                                }
+                            }
+                            //Choose retreat location randomly
+                            if (emptyAdjacents.length > 0) {
+                                var retreatIndex = Math.floor(Math.random() * emptyAdjacents.length);
+                                emptyAdjacents[retreatIndex].UnitArray.push(NextGameStatus[Location].UnitArray[i])
+                                NextGameStatus[Location].UnitArray.splice(i, 1);
+                                i--;
+                            } else {
+                                //Doom, Death, No Retreat
+                                NextGameStatus[Location].UnitArray.splice(i, 1);
+                                i--;
+                            }
+                        } else {
+                            //Push the Unit back to its original location
+                            NextGameStatus[NextGameStatus[Location].UnitArray[i].OriginalLocation].UnitArray.push(NextGameStatus[Location].UnitArray[i]);
+                            //Process the location the Unit was pushed back to 
+                            ProcessMoveConflicts(NextGameStatus, NextGameStatus[Location].UnitArray[i].OriginalLocation);
+                            //Remove the Unit from this location
+                            NextGameStatus[Location].UnitArray.splice(i, 1);
+                            i--;
+                        }
+                    }
+                }
+            }
+        };
+        
+        /*
+        Array 
+            Order
+                Destination
+                RecievingUnit
+                isSupport
+                SupportForID
+        */
+        var PlayerOrders = [];
+        var SentMovesToState = function() {
+            if (isHangout) {
+                gapi.hangout.data.submitDelta( { key: "Orders_" + gapi.hangout.getParticipantId(), value: JSON.stringify(PlayerOrders) } );
+            } else {
+                ProcessMoveQueue();
+            }
+        };
+        
+        var Initialize = function() {
+            CreatePlayingField(PlayingFieldData);
+            
+            var body = window.document.getElementsByTagName("BODY")[0];
+            var PlayingField = window.document.getElementById("PlayingField");
+            
+            //Create the end turn button
+            var EndTurn = window.document.createElement("div");
+            EndTurn.style.position = "absolute";
+            EndTurn.style.left = PlayingField.offsetWidth + "px";
+            EndTurn.style.top = "0px";
+            EndTurn.style.width = (body.offsetWidth - PlayingField.offsetWidth) + "px";
+            EndTurn.style.height = PlayingField.offsetHeight + "px";
+            EndTurn.style.textAlign = "center";
+            EndTurn.style.backgroundColor = "rgb(0, 0, 200)";
+            body.appendChild(EndTurn);
+            EndTurn.appendChild(window.document.createTextNode("End Turn"));
+            EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
+        
+            EndTurn.addEventListener("mousedown"
+                , function (evt) {
+                    SentMovesToState();
+                }
+            );
+        };
+        
+        var CreatePlayingField = function(Array_LandData) {
             var body = window.document.getElementsByTagName("BODY")[0];
             
             var PlayingField = window.document.createElement("div");
@@ -34,7 +269,7 @@
             PlayingField.style.position = "absolute";
             PlayingField.style.left = "0px";
             PlayingField.style.top = "0px";
-            PlayingField.style.width = "100%";
+            PlayingField.style.width = "90%";
             PlayingField.style.height = "100%";
             body.appendChild(PlayingField);
             
@@ -55,6 +290,11 @@
                 for (var i = 0; i < Array_LandData.length; i++) {
                     Array_LandData[i].StartX = Background.width * (Array_LandData[i].X + Array_LandData[i].Width / 2);
                     Array_LandData[i].StartY = Background.height * (Array_LandData[i].Y + Array_LandData[i].Height / 2);
+                    //Also make the calculation structure for unit moving
+                    Array_LandData[i].UnitArray = [];
+                    //Also, set the initial Player control over regions
+                    Array_LandData[i].OwnerID = null;
+                    Array_LandData[i].OwnerInfluence = 0;
                 }
                 for (var i = 0; i < Array_LandData.length; i++) {
                     for (var j = 0; j < Array_LandData[i].Connections.length; j++) {
@@ -75,7 +315,11 @@
                 block.style.top = 100 * Array_LandData[i].Y + "%";
                 block.style.width = 100 * Array_LandData[i].Width + "%";
                 block.style.height = 100 * Array_LandData[i].Height + "%";
-                block.style.backgroundColor = "rgb(" + i * 5 + ", 0, 0)";
+                block.style.borderWidth = "2px";
+                block.style.borderStyle = "solid";
+                block.style.borderRadius = "50%";
+                block.style.borderColor = "rgb(50, 50, 50)";
+                block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
                 PlayingField.appendChild(block);
             }
         };
@@ -93,7 +337,13 @@
                 acceptsFleet
                 isSupplyCenter
                 Connections (Array)
-                CostalRestrictions (Array of Array)
+            Javascript scripts will append the following to the DataStructure
+                StartX
+                StartY
+                Unit
+                UnitArray
+                OwnerID
+                OwnerInfluence
         */
         var PlayingFieldData =
         [
