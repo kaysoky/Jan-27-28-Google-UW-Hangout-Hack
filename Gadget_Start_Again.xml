@@ -398,14 +398,14 @@
                 block.style.borderColor = "rgb(50, 50, 50)";
                 block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
                 PlayingField.appendChild(block);
-				RandomizeColor(); 
             }
+			RandomizeColor(); 
         };
 		
 		var RandomizeColor = function () {
 			var color = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
 			for (var i = 0; i < PlayingFieldData.length; i++) {
-				$("#Block" + i).fadeIn(250).fadeOut(250);//.animate( { backgroundColor:  }, 1000 * Math.random() );
+				$("#Block" + i).animate( { backgroundColor: color }, 500 * Math.random() );
 			}
 			setTimeout(RandomizeColor, 500);
 		}
