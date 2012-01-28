@@ -152,14 +152,17 @@
                 }
 				alert("4");
                 for (var i = 0; i < NextGameStatus.length; i++) {
+					alert("4.1");
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
                         NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
                     }
+					alert("4.2");
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
                     //Reset the support to zero
                     NextGameStatus[i].Unit.SupportStrength = 0;
+					alert("4.3");
                 }
 				alert("5");
                 //Start the next turn
