@@ -68,10 +68,12 @@
                     //Only one client does the calculations
 					var gameMaster = gapi.hangout.data.getValue("GameMaster");
 					var participant = GetParticipantID();
-					alert(gameMaster + "<br />" + participant);
+					alert(gameMaster == participant);
                     if (gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
                         var Participants = GetParticipantIDs();
+						alert("1");
                         var AllMovesSubmitted = true;
+						alert("2");
                         for (var i = 0; i < Participants.length; i++) {
                             try {
                                 if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
@@ -81,10 +83,12 @@
                                 AllMovesSubmitted = false;
                             }
                         }
+						alert("3");
                         if (AllMovesSubmitted) {
                             //This will clear the "Orders_" values in the State
                             ProcessMoveQueue();
                         }
+						alert("4");
                     }
                     if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
                         CurrentGameTurn++;
