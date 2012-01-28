@@ -187,9 +187,13 @@
                 for (var i = 0; i < NextGameStatus.length; i++) {
                     //Commit the Unit moves
                     if (NextGameStatus[i].UnitArray.length == 1) {
-                        NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
 						alert("Unit placed back into thing");
-                    }
+                        NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
+                    } else {
+						if (NextGameStatus[i].UnitArray.length > 1) {
+							alert("Too long" + NextGameStatus[i].UnitArray.length);
+						}
+					}
                     //Reset Unit arrays
                     NextGameStatus[i].UnitArray = [];
                     //Reset the support to zero
