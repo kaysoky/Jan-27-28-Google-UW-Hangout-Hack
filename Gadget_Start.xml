@@ -16,7 +16,7 @@
           function(eventObj) {
               if (eventObj.isApiReady) {
                   var body = window.document.getElementsByTagName("BODY")[0];
-                  body.style.backgroundColor = "rgb(0, 255, 0);"
+                  body.style.backgroundColor = "rgb(0, 255, 0)";
               }
           }
       );
