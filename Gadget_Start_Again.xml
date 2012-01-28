@@ -57,65 +57,65 @@
                     if (eventObj.isApiReady) {
                         Initialize();
                         //Decide whom calculates the data of the game
-                        gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
-                        SetCurrentGameState(PlayingFieldData);
-                        gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
-						
-						//DEBUG Seed the game with units
-						var gameState = GetCurrentGameState();
-						for (var i = 0; i < gameState.length; i++) {
-							if (gameState[i].isSupplyCenter) {
-								gameState[i].Unit = 
-								{
-									OwnerID: GetParticipantID()
-									, SupportStrength: 1.5
-									, isArmy: true
-								};
-							}
-						}
-                        SetCurrentGameState(gameState);
+                        //gapi.hangout.data.submitDelta( { "GameMaster": GetParticipantID() } );
+                        //SetCurrentGameState(PlayingFieldData);
+                        //gapi.hangout.data.submitDelta( { "CurrentGameTurn": "0" } );
+						//
+						////DEBUG Seed the game with units
+						//var gameState = GetCurrentGameState();
+						//for (var i = 0; i < gameState.length; i++) {
+						//	if (gameState[i].isSupplyCenter) {
+						//		gameState[i].Unit = 
+						//		{
+						//			OwnerID: GetParticipantID()
+						//			, SupportStrength: 1.5
+						//			, isArmy: true
+						//		};
+						//	}
+						//}
+                        //SetCurrentGameState(gameState);
                     }
                 }
             );
-			var isUpdating = false;
-            gapi.hangout.data.onStateChanged.add(
-                function(eventObj) {
-                    //Only one client does the calculations
-					var gameMaster = gapi.hangout.data.getValue("GameMaster");
-					var participant = GetParticipantID();
-                    if (!isUpdating && gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
-                        var Participants = GetParticipantIDs();
-                        var AllMovesSubmitted = true;
-                        for (var i = 0; i < Participants.length; i++) {
-                            try {
-                                if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
-                                    AllMovesSubmitted = false;
-                                }
-                            } catch (notThere) {
-                                AllMovesSubmitted = false;
-                            }
-                        }
-                        if (AllMovesSubmitted) {
-							isUpdating = true;
-                            //This will clear the "Orders_" values in the State
-                            ProcessMoveQueue();
-							isUpdating = false;
-                        }
-                    }
-                    if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
-                        CurrentGameTurn++;
-                        //Display which blocks have units
-                        var gameState = GetCurrentGameState();
-                        for (var i = 0; i < gameState.length; i++) {
-                            if (gameState[i].Unit != null) {
-                                window.document.getElementById("Block" + i).innerHTML = "Unit";
-                            } else {
-                                window.document.getElementById("Block" + i).innerHTML = "";
-                            }
-                        }
-                    }
-                }
-            );
+			//var isUpdating = false;
+            //gapi.hangout.data.onStateChanged.add(
+            //    function(eventObj) {
+            //        //Only one client does the calculations
+			//		var gameMaster = gapi.hangout.data.getValue("GameMaster");
+			//		var participant = GetParticipantID();
+            //        if (!isUpdating && gapi.hangout.data.getValue("GameMaster") == GetParticipantID()) {
+            //            var Participants = GetParticipantIDs();
+            //            var AllMovesSubmitted = true;
+            //            for (var i = 0; i < Participants.length; i++) {
+            //                try {
+            //                    if (JSON.parse(gapi.hangout.data.getValue("Orders_" + Participants[i])) == null) {
+            //                        AllMovesSubmitted = false;
+            //                    }
+            //                } catch (notThere) {
+            //                    AllMovesSubmitted = false;
+            //                }
+            //            }
+            //            if (AllMovesSubmitted) {
+			//				isUpdating = true;
+            //                //This will clear the "Orders_" values in the State
+            //                ProcessMoveQueue();
+			//				isUpdating = false;
+            //            }
+            //        }
+            //        if (parseInt(gapi.hangout.data.getValue("CurrentGameTurn")) != CurrentGameTurn) {
+            //            CurrentGameTurn++;
+            //            //Display which blocks have units
+            //            var gameState = GetCurrentGameState();
+            //            for (var i = 0; i < gameState.length; i++) {
+            //                if (gameState[i].Unit != null) {
+            //                    window.document.getElementById("Block" + i).innerHTML = "Unit";
+            //                } else {
+            //                    window.document.getElementById("Block" + i).innerHTML = "";
+            //                }
+            //            }
+            //        }
+            //    }
+            //);
         } else {
             window.onload = function () {
                 Initialize();
@@ -316,24 +316,24 @@
             var body = window.document.getElementsByTagName("BODY")[0];
             var PlayingField = window.document.getElementById("PlayingField");
             
-            //Create the end turn button
-            var EndTurn = window.document.createElement("div");
-            EndTurn.style.position = "absolute";
-            EndTurn.style.left = PlayingField.offsetWidth + "px";
-            EndTurn.style.top = "0px";
-            EndTurn.style.width = (body.offsetWidth - PlayingField.offsetWidth) + "px";
-            EndTurn.style.height = PlayingField.offsetHeight + "px";
-            EndTurn.style.textAlign = "center";
-            EndTurn.style.backgroundColor = "rgb(0, 0, 200)";
-            body.appendChild(EndTurn);
-            EndTurn.appendChild(window.document.createTextNode("End Turn"));
-            EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
-        
-            EndTurn.addEventListener("mousedown"
-                , function (evt) {
-                    SentMovesToState();
-                }
-            );
+            ////Create the end turn button
+            //var EndTurn = window.document.createElement("div");
+            //EndTurn.style.position = "absolute";
+            //EndTurn.style.left = PlayingField.offsetWidth + "px";
+            //EndTurn.style.top = "0px";
+            //EndTurn.style.width = (body.offsetWidth - PlayingField.offsetWidth) + "px";
+            //EndTurn.style.height = PlayingField.offsetHeight + "px";
+            //EndTurn.style.textAlign = "center";
+            //EndTurn.style.backgroundColor = "rgb(0, 0, 200)";
+            //body.appendChild(EndTurn);
+            //EndTurn.appendChild(window.document.createTextNode("End Turn"));
+            //EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
+            //
+            //EndTurn.addEventListener("mousedown"
+            //    , function (evt) {
+            //        SentMovesToState();
+            //    }
+            //);
         };
         
         var CreatePlayingField = function(Array_LandData) {
@@ -344,7 +344,7 @@
             PlayingField.style.position = "absolute";
             PlayingField.style.left = "0px";
             PlayingField.style.top = "0px";
-            PlayingField.style.width = "90%";
+            PlayingField.style.width = "100%";
             PlayingField.style.height = "100%";
             body.appendChild(PlayingField);
             
@@ -398,8 +398,17 @@
                 block.style.borderColor = "rgb(50, 50, 50)";
                 block.style.backgroundColor = "rgb(" + i * 5 + ", 150, 150)";
                 PlayingField.appendChild(block);
+				RandomizeColor(); 
             }
         };
+		
+		var RandomizeColor = function () {
+			var color = "rgb(" + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ", " + Math.round(Math.random() * 255) + ")";
+			for (var i = 0; i < PlayingFieldData.length; i++) {
+				$("#Block" + i).animate( { backgroundColor: color }, 1000 * Math.random() );
+			}
+			setTimeout(RandomizeColor, 500);
+		}
 
         //Look at PlayingFieldData.xcls for the construction of this data
         /*
