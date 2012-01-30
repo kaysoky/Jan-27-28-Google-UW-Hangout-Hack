@@ -4,6 +4,7 @@
  */
  
 /**
+ * INCOMPLETE
  * Tells the script to load the application after the Hangout is ready
  */
 gapi.hangout.onApiReady.add(

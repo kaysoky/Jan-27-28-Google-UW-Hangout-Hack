@@ -1,5 +1,6 @@
 /** README
  * This file contains the vital methods of the Diplomacy application
+ * "[TEMP]" or "INCOMPLETE" marks areas to work on
  */
  
 var Diplomacy = {};
@@ -32,7 +33,7 @@ Diplomacy.InitializeClientScreen = function () {
 	
 	EndTurn.addEventListener("mousedown"
 	    , function (evt) {
-	        SentMovesToState();
+	        //SentMovesToState();
 	    }
 	);
 };
@@ -221,38 +222,36 @@ Diplomacy.ProcessMoveQueue = function (GameState, MoveQueue) {
 	for (var i = 0; i < MoveQueue.length; i++) {
 		Diplomacy.ProcessMoveConflicts(GameState, i);
 	}
-	//for (var i = 0; i < NextGameStatus.length; i++) {
-	//	ProcessMoveConflicts(NextGameStatus, i);
-	//}
-	//for (var i = 0; i < NextGameStatus.length; i++) {
-	//	//Commit the Unit moves
-	//	if (NextGameStatus[i].UnitArray.length == 1) {
-	//		NextGameStatus[i].Unit = NextGameStatus[i].UnitArray[0];
-	//	}
-	//	//Reset Unit arrays
-	//	NextGameStatus[i].UnitArray = [];
-	//	//Reset the support to zero
-	//	if (NextGameStatus[i].Unit != null) {
-	//		NextGameStatus[i].Unit.SupportStrength = 0;
-	//	}
-	//}
-	////Start the next turn
-	//BeginTurn(NextGameStatus);
+	
+	//Commit all the Unit moves
+	for (var i = 0; i < MoveQueue.length; i++) {
+		if (MoveQueue[i].UnitArray.length == 1) {
+			MoveQueue[i].Unit = MoveQueue[i].UnitArray.length[0]
+		} else if (MoveQueue[i].UnitArray.length > 1) {
+			alert("Diplomacy.ProcessMoveConflicts has failed");
+		}
+	}
+	//Start the next turn
+	Diplomacy.IncrementTurn(GameState);
+	
+	
 	////Finally, submit the changed state
 	//SetCurrentGameState(NextGameStatus);
 	//gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
 };
 
 /**
- * INCOMPLETE
  * Recursive method that processes each space in the "GameState" 
+ *    "GameState" is changed in the process
  * Ends once up to one unit exists in the UnitArray of each space
  */
 Diplomacy.ProcessMoveConflicts = function (GameState, Location) {
 	if (GameState[Location].UnitArray.length >= 1 ) {
-		var winner;
+		//When in conflict, unit allegiance does not matter
+		//   Only the strongest unit may stay
+		//   In the event of a draw, all units are bounced back
+		var winner = null;
 		var winnerStrength = 0;
-		//Find the winner
 		for (var i = 0; i < GameState[Location].UnitArray.length; i++) {
 			if (1 + GameState[Location].UnitArray[i].SupportStrength > winnerStrength) {
 				winner = GameState[Location].UnitArray[i];
@@ -261,62 +260,79 @@ Diplomacy.ProcessMoveConflicts = function (GameState, Location) {
 				winner = null;
 			}
 		}
+		
 		//Make all losers retreat
 		for (var i = 0; i < GameState[Location].UnitArray.length; i++) {
 			if (GameState[Location].UnitArray[i] != winner) {
-				//Bounce back losers
-				//If losers bounce back to same area
-				if (GameState[Location].UnitArray[i].OriginalLocation == Location) {
-					//Bounce away allies and weaker enemies
-					for (var j = 0; j < GameState[Location].UnitArray.length; j++) {
-						if (i != j 
-							&& (GameState[Location].UnitArray[j].OwnerID == GameState[Location].UnitArray[i].OwnerID
-								|| GameState[Location].UnitArray[j].SupportStrength == 0)) {
-							//Push the Unit back to its original location
-							GameState[GameState[Location].UnitArray[j].OriginalLocation].UnitArray.push(GameState[Location].UnitArray[j]);
-							//Process the location the Unit was pushed back to 
-							ProcessMoveConflicts(GameState, GameState[Location].UnitArray[j].OriginalLocation);
-							//Remove the Unit from this location
-							GameState[Location].UnitArray.remove(j);
-							//Maintain the "i" value so that it points to the same Unit
-							if (j < i) {
-								i--;
-							}
-						}
-					}
-					//If a stronger force still exists, retreat
-					var emptyAdjacents = [];
-					for (var j = 0; j < GameState[Location].Connections.length; j++) {
-						if (GameState[GameState[Location].Connections[j]].UnitArray.length == 0) {
-							emptyAdjacents.push(GameState[GameState[Location].Connections[j]]);
-						}
-					}
-					//Choose retreat location randomly
-					if (emptyAdjacents.length > 0) {
-						var retreatIndex = Math.floor(Math.random() * emptyAdjacents.length);
-						emptyAdjacents[retreatIndex].UnitArray.push(GameState[Location].UnitArray[i])
-						GameState[Location].UnitArray.remove(i--);
-					} else {
-						//Doom, Death, No Retreat
-						GameState[Location].UnitArray.remove(i--);
-					}
-				} else {
-					//Push the Unit back to its original location
-					GameState[GameState[Location].UnitArray[i].OriginalLocation].UnitArray.push(GameState[Location].UnitArray[i]);
-					//Process the location the Unit was pushed back to 
-					ProcessMoveConflicts(GameState, GameState[Location].UnitArray[i].OriginalLocation);
-					//Remove the Unit from this location
-					GameState[Location].UnitArray.remove(i--);
-				}
+				//Since ProcessConflictLoser is a complex removeAt(index)
+				//   the iterator must de-increment
+				i = Diplomacy.ProcessConflictLoser(GameState, Location, i) - 1;
 			}
 		}
 	}
 };
 
 /**
+ * Recursive method that removes GameState[Location].UnitArray[UnitIndex]
+ *    Calls itself to remove other units
+ *    Also calls ProcessMoveConflicts
+ * Returns the resulting index of the removed unit
+ */
+Diplomacy.ProcessConflictLoser = function (GameState, Location, UnitIndex) {
+	//There can only be one Unit per space where this is true
+	if (GameState[Location].UnitArray[UnitIndex].OriginalLocation == Location) {
+		//Bounce away allies and enemies of <= strength
+		for (var i = 0; i < GameState[Location].UnitArray.length; i++) {
+			if (i != UnitIndex
+				&& (GameState[Location].UnitArray[i].OwnerID == GameState[Location].UnitArray[UnitIndex].OwnerID
+					|| GameState[Location].UnitArray[i].SupportStrength <= GameState[Location].UnitArray[UnitIndex].supportStrength)
+				) {
+				Diplomacy.ProcessConflictLoser(GameState, Location, i);
+				//Maintain the "UnitIndex" value so that it points to the same Unit
+				if (i < UnitIndex) {
+					UnitIndex--;
+				}
+				i--;
+			}
+		}
+		
+		//If a stronger force still exists
+		if (GameState[Location].UnitArray.length > 1) {
+			//Find a place to retreat to 
+			var emptyAdjacents = [];
+			for (var i = 0; i < GameState[Location].Connections.length; i++) {
+				if (GameState[GameState[Location].Connections[i]].UnitArray.length == 0) {
+					emptyAdjacents.push(GameState[Location].Connections[i]);
+				}
+			}
+			//Choose retreat location randomly
+			if (emptyAdjacents.length > 0) {
+				var retreatIndex = emptyAdjacents[Math.floor(Math.random() * emptyAdjacents.length)];
+				GameState[retreatIndex].UnitArray.push(GameState[Location].UnitArray[UnitIndex])
+				GameState[Location].UnitArray.splice(UnitIndex, 1);
+			} else {
+				//Doom and Death ... No retreat
+				GameState[Location].UnitArray.remove(UnitIndex, 1);
+			}
+		}
+	} else {
+		//Push the Unit back to its original location
+		GameState[GameState[Location].UnitArray[UnitIndex].OriginalLocation].UnitArray.push(GameState[Location].UnitArray[i]);
+		
+		//Process the location the Unit was pushed back to 
+		Diplomacy.ProcessMoveConflicts(GameState, GameState[Location].UnitArray[i].OriginalLocation);
+		
+		//Remove the Unit from this location
+		GameState[Location].UnitArray.splice(UnitIndex, 1);
+	}
+	
+	return UnitIndex;
+};
+
+/**
  * INCOMPLETE
  */
-Diplomacy.BeginTurn = function (GameState) {
+Diplomacy.IncrementTurn = function (GameState) {
 	for (var i = 0; i < GameState.length; i++) {
 		//Increment the Player's control over the regions
 		if (GameState[i].Unit != null) {
