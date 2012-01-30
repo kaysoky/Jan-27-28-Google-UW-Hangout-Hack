@@ -11,6 +11,7 @@
       <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=0.1"></script>
       
       <!--Grabs the script from GitHub-->
+	  <script src="https://raw.github.com/kaysoky/Jan-27-28-Google-UW-Hangout-Hack/master/ObjectCreator.js"></script>
 	  <script src="https://raw.github.com/kaysoky/Jan-27-28-Google-UW-Hangout-Hack/master/Diplomacy.js"></script>
 	  <script src="https://raw.github.com/kaysoky/Jan-27-28-Google-UW-Hangout-Hack/master/Link_Gadget.js"></script>
     ]]>

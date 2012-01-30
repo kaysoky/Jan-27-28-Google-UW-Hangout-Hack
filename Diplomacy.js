@@ -12,7 +12,7 @@ var Diplomacy = {};
  */
 Diplomacy.InitializeClientScreen = function () {
 
-	Diplomacy.CreatePlayingField(Diplomacy.PlayingFieldData);
+    Diplomacy.CreatePlayingField(ObjectCreator.CreateTestingField());
 	
 	var body = window.document.getElementsByTagName("BODY")[0];
 	var PlayingField = window.document.getElementById("PlayingField");
@@ -108,81 +108,7 @@ Diplomacy.CreatePlayingField = function(Array_LandData) {
 	}
 };
 
-//Look at PlayingFieldData.xcls for the construction of this data
-/*
-Array
-	Object of structure:
-		X
-		Y
-		Width
-		Height
-		Label
-		acceptsArmy
-		acceptsFleet
-		isSupplyCenter
-		Connections (Array)
-	Scripts will append the following to the object
-		Unit
-		UnitArray
-		OwnerID
-		OwnerInfluence
-*/
-Diplomacy.PlayingFieldData =
-[
-	{ X: 0, Y:0, Width: 0.05, Height: 0.1, Label: 0, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [1, 10] }
-	, { X: 0.1, Y:0, Width: 0.05, Height: 0.1, Label: 1, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [0, 2, 11] }
-	, { X: 0.2, Y:0, Width: 0.05, Height: 0.1, Label: 2, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [1, 3, 12] }
-	, { X: 0.3, Y:0, Width: 0.05, Height: 0.1, Label: 3, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [2, 4, 13] }
-	, { X: 0.4, Y:0, Width: 0.05, Height: 0.1, Label: 4, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [3, 5, 14] }
-	, { X: 0.5, Y:0, Width: 0.05, Height: 0.1, Label: 5, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [4, 6, 15] }
-	, { X: 0.6, Y:0, Width: 0.05, Height: 0.1, Label: 6, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [5, 7, 16] }
-	, { X: 0.7, Y:0, Width: 0.05, Height: 0.1, Label: 7, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [6, 8, 17] }
-	, { X: 0.8, Y:0, Width: 0.05, Height: 0.1, Label: 8, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [7, 9, 18] }
-	, { X: 0.9, Y:0, Width: 0.05, Height: 0.1, Label: 9, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [8, 19] }
-	, { X: 0, Y:0.2, Width: 0.05, Height: 0.1, Label: 10, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [    11, 20, 0] }
-	, { X: 0.1, Y:0.2, Width: 0.05, Height: 0.1, Label: 11, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [10, 12, 21, 1] }
-	, { X: 0.2, Y:0.2, Width: 0.05, Height: 0.1, Label: 12, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [11, 13, 22, 2] }
-	, { X: 0.3, Y:0.2, Width: 0.05, Height: 0.1, Label: 13, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [12, 14, 23, 3] }
-	, { X: 0.4, Y:0.2, Width: 0.05, Height: 0.1, Label: 14, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [13, 15, 24, 4] }
-	, { X: 0.5, Y:0.2, Width: 0.05, Height: 0.1, Label: 15, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [14, 16, 25, 5] }
-	, { X: 0.6, Y:0.2, Width: 0.05, Height: 0.1, Label: 16, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [15, 17, 26, 6] }
-	, { X: 0.7, Y:0.2, Width: 0.05, Height: 0.1, Label: 17, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [16, 18, 27, 7] }
-	, { X: 0.8, Y:0.2, Width: 0.05, Height: 0.1, Label: 18, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [17, 19, 28, 8] }
-	, { X: 0.9, Y:0.2, Width: 0.05, Height: 0.1, Label: 19, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [18,     29, 9] }
-	, { X: 0, Y:0.4, Width: 0.05, Height: 0.1, Label: 20, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [    21, 30, 10] }
-	, { X: 0.1, Y:0.4, Width: 0.05, Height: 0.1, Label: 21, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [20, 22, 31, 11] }
-	, { X: 0.2, Y:0.4, Width: 0.05, Height: 0.1, Label: 22, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [21, 23, 32, 12] }
-	, { X: 0.3, Y:0.4, Width: 0.05, Height: 0.1, Label: 23, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [22, 24, 33, 13] }
-	, { X: 0.4, Y:0.4, Width: 0.05, Height: 0.1, Label: 24, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [23, 25, 34, 14] }
-	, { X: 0.5, Y:0.4, Width: 0.05, Height: 0.1, Label: 25, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: true, Connections: [24, 26, 35, 15] }
-	, { X: 0.6, Y:0.4, Width: 0.05, Height: 0.1, Label: 26, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [25, 27, 36, 16] }
-	, { X: 0.7, Y:0.4, Width: 0.05, Height: 0.1, Label: 27, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [26, 28, 37, 17] }
-	, { X: 0.8, Y:0.4, Width: 0.05, Height: 0.1, Label: 28, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: true, Connections: [27, 29, 38, 18] }
-	, { X: 0.9, Y:0.4, Width: 0.05, Height: 0.1, Label: 29, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [28,     39, 19] }
-	, { X: 0, Y:0.6, Width: 0.05, Height: 0.1, Label: 30, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [    31, 40, 20] }
-	, { X: 0.1, Y:0.6, Width: 0.05, Height: 0.1, Label: 31, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [30, 32, 41, 21] }
-	, { X: 0.2, Y:0.6, Width: 0.05, Height: 0.1, Label: 32, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [31, 33, 42, 22] }
-	, { X: 0.3, Y:0.6, Width: 0.05, Height: 0.1, Label: 33, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [32, 34, 43, 23] }
-	, { X: 0.4, Y:0.6, Width: 0.05, Height: 0.1, Label: 34, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [33, 35, 44, 24] }
-	, { X: 0.5, Y:0.6, Width: 0.05, Height: 0.1, Label: 35, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [34, 36, 45, 25] }
-	, { X: 0.6, Y:0.6, Width: 0.05, Height: 0.1, Label: 36, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [35, 37, 46, 26] }
-	, { X: 0.7, Y:0.6, Width: 0.05, Height: 0.1, Label: 37, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [36, 38, 47, 27] }
-	, { X: 0.8, Y:0.6, Width: 0.05, Height: 0.1, Label: 38, acceptsArmy: false, acceptsFleet: true, isSupplyCenter: false, Connections: [37, 39, 48, 28] }
-	, { X: 0.9, Y:0.6, Width: 0.05, Height: 0.1, Label: 39, acceptsArmy: true, acceptsFleet: true, isSupplyCenter: false, Connections: [38,     49, 29] }
-	, { X: 0, Y:0.8, Width: 0.05, Height: 0.1, Label: 40, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [    41, 30] }
-	, { X: 0.1, Y:0.8, Width: 0.05, Height: 0.1, Label: 41, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [40, 42, 31] }
-	, { X: 0.2, Y:0.8, Width: 0.05, Height: 0.1, Label: 42, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [41, 43, 32] }
-	, { X: 0.3, Y:0.8, Width: 0.05, Height: 0.1, Label: 43, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [42, 44, 33] }
-	, { X: 0.4, Y:0.8, Width: 0.05, Height: 0.1, Label: 44, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [43, 45, 34] }
-	, { X: 0.5, Y:0.8, Width: 0.05, Height: 0.1, Label: 45, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [44, 46, 35] }
-	, { X: 0.6, Y:0.8, Width: 0.05, Height: 0.1, Label: 46, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: true, Connections: [45, 47, 36] }
-	, { X: 0.7, Y:0.8, Width: 0.05, Height: 0.1, Label: 47, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [46, 48, 37] }
-	, { X: 0.8, Y:0.8, Width: 0.05, Height: 0.1, Label: 48, acceptsArmy: false, acceptsFleet: false, isSupplyCenter: false, Connections: [47, 49, 38] }
-	, { X: 0.9, Y:0.8, Width: 0.05, Height: 0.1, Label: 49, acceptsArmy: true, acceptsFleet: false, isSupplyCenter: false, Connections: [48,     39] }
-];
-
 /**
- * INCOMPLETE
  * Changes and returns the parameter "GameState" based on "MoveQueue"
  * "MoveQueue" should be a single array of orders (not a jagged array)
  */
@@ -233,11 +159,6 @@ Diplomacy.ProcessMoveQueue = function (GameState, MoveQueue) {
 	}
 	//Start the next turn
 	Diplomacy.IncrementTurn(GameState);
-	
-	
-	////Finally, submit the changed state
-	//SetCurrentGameState(NextGameStatus);
-	//gapi.hangout.data.submitDelta( { "CurrentGameTurn": "" + (1 + parseInt(gapi.hangout.data.getValue("CurrentGameTurn"))) } );
 };
 
 /**
@@ -330,7 +251,7 @@ Diplomacy.ProcessConflictLoser = function (GameState, Location, UnitIndex) {
 };
 
 /**
- * INCOMPLETE
+ * Calculates the ownership of space and automatically creates units
  */
 Diplomacy.IncrementTurn = function (GameState) {
 	for (var i = 0; i < GameState.length; i++) {
@@ -348,15 +269,16 @@ Diplomacy.IncrementTurn = function (GameState) {
 				GameState[i].OwnerInfluence = 0.15 + 0.95 * GameState[i].OwnerInfluence;
 			}
 		} else if (GameState[i].isSupplyCenter 
-		&& GameState[i].OwnerInfluence > 1.5 
-		&& GameState[i].OwnerID != null) {
+		    && GameState[i].OwnerInfluence > 1.5
+		    && GameState[i].OwnerID != null) 
+		{
 			//This is the only place where units are created
-			GameState[i].Unit = 
-			{
-				OwnerID: GameState[i].OwnerID
-				, SupportStrength: 0
-				, isArmy: true
-			};
+		    GameState[i].Unit = new ObjectCreator.Unit(
+			    {
+				    OwnerID: GameState[i].OwnerID
+				    , isArmy: true
+			    }
+			);
 		}
 	}
 };
