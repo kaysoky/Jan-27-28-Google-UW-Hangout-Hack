@@ -198,7 +198,7 @@ Diplomacy.ProcessMoveQueue = function (GameState, MoveQueue) {
 	//   Support/Holding units move onto their own space
 	for (var i = 0; i < MoveQueue.length; i++) {
 		GameState[MoveQueue[i].RecievingUnit].Unit.OriginalLocation = MoveQueue[i].RecievingUnit;
-		GameState[MoveQueue[i].Destination].UnitArray.push(GameState.[MoveQueue[i].RecievingUnit].Unit);
+		GameState[MoveQueue[i].Destination].UnitArray.push(GameState[MoveQueue[i].RecievingUnit].Unit);
 		GameState[MoveQueue[i].RecievingUnit].Unit = null;
 	}
 	
