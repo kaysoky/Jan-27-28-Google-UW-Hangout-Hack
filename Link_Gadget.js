@@ -2,7 +2,7 @@
  * This file contains the entry point to the Google+ Hangout
  * Must be called after Diplomacy.js
  */
- 
+
 /**
  * INCOMPLETE
  * Tells the script to load the application after the Hangout is ready
@@ -33,25 +33,35 @@ gapi.hangout.onApiReady.add(
 		}
 	}
 );
+ 
+/**
+ * This Regex gets matches all non-hexadecimal characters
+ * Used to regularize Particiant ID's such that they can be used in eval() expressions
+ */
+var ParticipantRegex = new RegExp('[^a-fA-F0-9]', "g");
+/**
+ * Returns the ID of this participant in regularized, usable form
+ */
+var GetParticipantID = function () {
+	return gapi.hangout.getParticipantId().replace(ParticipantRegex, "");
+};
+/**
+ * Returns the ID's of all participants in this Hangout, in regularized, usable form
+ */
+var GetParticipantIDs = function () {
+	var Participants = gapi.hangout.getParticipants();
+	var IDs = [];
+	for (var i = 0; i < Participants.length; i++) {
+		IDs.push(Participants[i].id.replace(ParticipantRegex, ""));
+	}
+	return IDs;
+};
 
 /**
  * 
  */
 
 
-////Gets rid of periods in the participant IDs
-//var DePeriodExpression = new RegExp("(\\W+)", "g");
-//var GetParticipantID = function () {
-//	return gapi.hangout.getParticipantId().replace(DePeriodExpression, "");
-//};
-//var GetParticipantIDs = function () {
-//	var parties = gapi.hangout.getParticipants();
-//	var IDs = [];
-//	for (var i = 0; i < parties.length; i++) {
-//		IDs.push(parties[i].id.replace(DePeriodExpression, ""));
-//	}
-//	return IDs;
-//};
 ////Breaks up the GameState into many, many objects so that no string limits are reached
 //var GetCurrentGameState = function () {
 //	var length = parseInt(gapi.hangout.data.getValue("GameStateLength"));

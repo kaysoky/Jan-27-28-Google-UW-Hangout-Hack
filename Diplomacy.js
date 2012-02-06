@@ -252,6 +252,7 @@ Diplomacy.ProcessConflictLoser = function (GameState, Location, UnitIndex) {
 
 /**
  * Calculates the ownership of space and automatically creates units
+ * INCOMPLETE - Currently does not take into account unit count limits
  */
 Diplomacy.IncrementTurn = function (GameState) {
 	for (var i = 0; i < GameState.length; i++) {
@@ -276,7 +277,7 @@ Diplomacy.IncrementTurn = function (GameState) {
 		    GameState[i].Unit = new ObjectCreator.Unit(
 			    {
 				    OwnerID: GameState[i].OwnerID
-				    , isArmy: true
+				    , isArmy: (GameState[i].acceptsFleet ? Math.random() > 0.5 : true)
 			    }
 			);
 		}
