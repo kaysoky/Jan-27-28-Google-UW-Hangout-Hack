@@ -1,6 +1,8 @@
 /** README
  * This file contains the vital methods of the Diplomacy application
- * "[TEMP]" or "INCOMPLETE" marks areas to work on
+ * TODO: UI
+ *    More buttons and options need to be added
+ *    Diplomacy, Espionage, Settings, etc buttons
  */
  
 var Diplomacy = {};
@@ -10,15 +12,16 @@ var Diplomacy = {};
  * Creates a HUD of buttons to the right side of the screen
  *    [TEMP] Just the EndTurn button
  */
-Diplomacy.InitializeClientScreen = function () {
+Diplomacy.InitializeClientScreen = function (mapdata) {
 
-    Diplomacy.CreatePlayingField(ObjectCreator.CreateTestingField());
+    Diplomacy.CreatePlayingField(mapdata);
 	
 	var body = window.document.getElementsByTagName("BODY")[0];
 	var PlayingField = window.document.getElementById("PlayingField");
 	
 	//Create the EndTurn button
 	var EndTurn = window.document.createElement("div");
+	EndTurn.id = "EndTurnButton";
 	EndTurn.style.position = "absolute";
 	EndTurn.style.left = PlayingField.offsetLeft + PlayingField.offsetWidth + "px";
 	EndTurn.style.top = PlayingField.offsetLeft.offsetTop + "px";
@@ -30,12 +33,6 @@ Diplomacy.InitializeClientScreen = function () {
 	body.appendChild(EndTurn);
 	EndTurn.appendChild(window.document.createTextNode("End Turn"));
 	EndTurn.style.lineHeight = EndTurn.offsetHeight + "px";
-	
-	EndTurn.addEventListener("mousedown"
-	    , function (evt) {
-	        //SentMovesToState();
-	    }
-	);
 };
 
 
