@@ -1,6 +1,6 @@
 /** README
  * This file contains the vital methods of the Diplomacy application
- * TODO: UI
+ * TODO: UI 
  *    More buttons and options need to be added
  *    Diplomacy, Espionage, Settings, etc buttons
  */
